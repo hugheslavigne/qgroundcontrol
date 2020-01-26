@@ -155,6 +155,7 @@ Item {
     }
     Column {
         id:                     instrumentsColumn
+        visible: false
         spacing:                ScreenTools.defaultFontPixelHeight * 0.25
         anchors.top:            parent.top
         anchors.topMargin:      QGroundControl.corePlugin.options.instrumentWidget ? (QGroundControl.corePlugin.options.instrumentWidget.widgetTopMargin + (ScreenTools.defaultFontPixelHeight * 0.5)) : 0

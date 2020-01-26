@@ -26,6 +26,7 @@ Item {
     id:     root
     width:  size
     height: size
+    visible: false
 
     property real size:     _defaultSize
     property var  vehicle:  null
