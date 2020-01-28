@@ -555,7 +555,7 @@ QGCView {
         }
 
         ToolStrip {
-            visible:            (_activeVehicle ? _activeVehicle.guidedModeSupported : true) && !QGroundControl.videoManager.fullScreen
+            visible:            false
             id:                 toolStrip
             anchors.leftMargin: isInstrumentRight() ? ScreenTools.defaultFontPixelWidth : undefined
             anchors.left:       isInstrumentRight() ? _panel.left : undefined

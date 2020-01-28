@@ -110,7 +110,6 @@ Rectangle {
                 exclusiveGroup:     mainActionGroup
                 source:             "/qmlimages/Gears.svg"
                 onClicked:          toolBar.showSetupView()
-                visible: false
             }
 
             QGCToolBarButton {
@@ -128,7 +127,7 @@ Rectangle {
                 anchors.top:        parent.top
                 anchors.bottom:     parent.bottom
                 exclusiveGroup:     mainActionGroup
-                source:             "/qmlimages/PaperPlane.svg"
+                source:             "/qmlimages/deleaves.svg"
                 onClicked:          toolBar.showFlyView()
             }
 
