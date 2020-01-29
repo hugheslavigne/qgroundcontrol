@@ -23,6 +23,7 @@ Item {
     anchors.top:    parent.top
     anchors.bottom: parent.bottom
     width:          flightModeSelector.width
+    visible:        visible
 
     property var _activeVehicle:    QGroundControl.multiVehicleManager.activeVehicle
     property var _flightModes:      _activeVehicle ? _activeVehicle.flightModes : [ ]

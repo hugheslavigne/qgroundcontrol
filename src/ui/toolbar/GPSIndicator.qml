@@ -21,6 +21,7 @@ import QGroundControl.Palette               1.0
 //-------------------------------------------------------------------------
 //-- GPS Indicator
 Item {
+    visible:        false
     id:             satelitte
     width:          (gpsValuesColumn.x + gpsValuesColumn.width) * 1.1
     anchors.top:    parent.top

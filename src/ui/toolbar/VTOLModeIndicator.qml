@@ -26,7 +26,7 @@ QGCLabel {
     text:               _fwdFlight ? qsTr("VTOL: Fixed Wing") : qsTr("VTOL: Multi-Rotor")
     font.pointSize:     ScreenTools.mediumFontPointSize
     color:              qgcPal.buttonText
-    visible:            _activeVehicle ? _activeVehicle.vtol && _activeVehicle.px4Firmware : false
+    visible:            false
     width:              visible ? implicitWidth : 0
 
     property var    _activeVehicle: QGroundControl.multiVehicleManager.activeVehicle
