@@ -1,10 +1,10 @@
-prefix=/home/slomo/cerbero/dist/android_armv7
+prefix=/home/cerbero/cerbero/build/dist/android_universal/armv7
 exec_prefix=${prefix}
-libdir=/home/slomo/cerbero/dist/android_armv7/lib
+libdir=/home/cerbero/cerbero/build/dist/android_universal/armv7/lib
 includedir=${prefix}/include
 
 Name: expat
-Version: 2.1.0
+Version: 2.2.7
 Description: expat XML parser
 URL: http://www.libexpat.org
 Libs: -L${libdir} -lexpat

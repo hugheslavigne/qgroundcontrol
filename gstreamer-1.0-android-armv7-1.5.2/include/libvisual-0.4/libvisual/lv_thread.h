@@ -63,7 +63,7 @@ struct _VisMutex {
 #ifdef VISUAL_THREAD_MODEL_POSIX
 	pthread_mutex_t mutex;		/**< Private used for the pthreads implementation. */
 #elif defined(VISUAL_THREAD_MODEL_WIN32) /* !VISUAL_THREAD_MODEL_POSIX */
-
+	int unused;			/* MSVC does not allow empty structs */
 #elif defined(VISUAL_THREAD_MODEL_GTHREAD) /* !VISUAL_THREAD_MODEL_WIN32 */
 	GMutex *mutex;
 

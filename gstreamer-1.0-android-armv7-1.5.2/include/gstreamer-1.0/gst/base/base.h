@@ -22,12 +22,16 @@
 #ifndef __GST_BASE_H__
 #define __GST_BASE_H__
 
+#include <gst/base/base-prelude.h>
+
 #include <gst/base/gstadapter.h>
+#include <gst/base/gstaggregator.h>
 #include <gst/base/gstbaseparse.h>
 #include <gst/base/gstbasesink.h>
 #include <gst/base/gstbasesrc.h>
 #include <gst/base/gstbasetransform.h>
 #include <gst/base/gstbitreader.h>
+#include <gst/base/gstbitwriter.h>
 #include <gst/base/gstbytereader.h>
 #include <gst/base/gstbytewriter.h>
 #include <gst/base/gstcollectpads.h>

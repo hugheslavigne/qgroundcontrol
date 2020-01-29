@@ -28,6 +28,7 @@
 
 G_BEGIN_DECLS
 
+GST_GL_API
 GType gst_gl_color_convert_get_type (void);
 #define GST_TYPE_GL_COLOR_CONVERT (gst_gl_color_convert_get_type())
 #define GST_GL_COLOR_CONVERT(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj),GST_TYPE_GL_COLOR_CONVERT,GstGLColorConvert))
@@ -59,8 +60,7 @@ struct _GstGLColorConvert
   GstBuffer *    outbuf;
 
   /* used for the conversion */
-  GLuint           fbo;
-  GLuint           depth_buffer;
+  GstGLFramebuffer *fbo;
   GstGLShader     *shader;
 
   /* <private> */
@@ -76,7 +76,10 @@ struct _GstGLColorConvert
  */
 struct _GstGLColorConvertClass
 {
+  /* <private> */
   GstObjectClass object_class;
+
+  gpointer _padding[GST_PADDING];
 };
 
 /**
@@ -84,10 +87,10 @@ struct _GstGLColorConvertClass
  *
  * The currently supported formats that can be converted
  */
-#define GST_GL_COLOR_CONVERT_FORMATS "{ RGB, RGBx, RGBA, BGR, BGRx, BGRA, xRGB, " \
+#define GST_GL_COLOR_CONVERT_FORMATS "{ RGBA, RGB, RGBx, BGR, BGRx, BGRA, xRGB, " \
                                "xBGR, ARGB, ABGR, Y444, I420, YV12, Y42B, " \
-                               "Y41B, NV12, NV21, YUY2, UYVY, AYUV, " \
-                               "GRAY8, GRAY16_LE, GRAY16_BE, RGB16, BGR16 }"
+                               "Y41B, NV12, NV21, YUY2, UYVY, AYUV, VUYA, " \
+                               "GRAY8, GRAY16_LE, GRAY16_BE, RGB16, BGR16, ARGB64 }"
 
 /**
  * GST_GL_COLOR_CONVERT_VIDEO_CAPS:
@@ -95,19 +98,43 @@ struct _GstGLColorConvertClass
  * The currently supported #GstCaps that can be converted
  */
 #define GST_GL_COLOR_CONVERT_VIDEO_CAPS \
-    GST_VIDEO_CAPS_MAKE_WITH_FEATURES (GST_CAPS_FEATURE_MEMORY_GL_MEMORY, \
-        GST_GL_COLOR_CONVERT_FORMATS)
+    "video/x-raw(" GST_CAPS_FEATURE_MEMORY_GL_MEMORY "), "              \
+    "format = (string) " GST_GL_COLOR_CONVERT_FORMATS ", "              \
+    "width = " GST_VIDEO_SIZE_RANGE ", "                                \
+    "height = " GST_VIDEO_SIZE_RANGE ", "                               \
+    "framerate = " GST_VIDEO_FPS_RANGE ", "                             \
+    "texture-target = (string) { 2D, rectangle, external-oes } "        \
+    " ; "                                                               \
+    "video/x-raw(" GST_CAPS_FEATURE_MEMORY_GL_MEMORY ","                \
+    GST_CAPS_FEATURE_META_GST_VIDEO_OVERLAY_COMPOSITION "), "           \
+    "format = (string) " GST_GL_COLOR_CONVERT_FORMATS ", "              \
+    "width = " GST_VIDEO_SIZE_RANGE ", "                                \
+    "height = " GST_VIDEO_SIZE_RANGE ", "                               \
+    "framerate = " GST_VIDEO_FPS_RANGE ", "                             \
+    "texture-target = (string) { 2D, rectangle, external-oes }"
 
+GST_GL_API
 GstGLColorConvert * gst_gl_color_convert_new (GstGLContext * context);
 
-GstCaps *   gst_gl_color_convert_transform_caps (GstGLContext * convert,
+GST_GL_API
+GstCaps *   gst_gl_color_convert_transform_caps (GstGLContext * context,
                                                  GstPadDirection direction,
                                                  GstCaps * caps,
                                                  GstCaps * filter);
+GST_GL_API
+GstCaps *   gst_gl_color_convert_fixate_caps    (GstGLContext * context,
+                                                 GstPadDirection direction,
+                                                 GstCaps * caps,
+                                                 GstCaps * other);
+GST_GL_API
 gboolean    gst_gl_color_convert_set_caps    (GstGLColorConvert * convert,
                                               GstCaps           * in_caps,
                                               GstCaps           * out_caps);
+GST_GL_API
+gboolean    gst_gl_color_convert_decide_allocation (GstGLColorConvert   * convert,
+                                                    GstQuery            * query);
 
+GST_GL_API
 GstBuffer * gst_gl_color_convert_perform    (GstGLColorConvert * convert, GstBuffer * inbuf);
 
 G_END_DECLS

@@ -2,7 +2,8 @@
 #define __NETTLE_STDINT_H 1
 #ifndef _GENERATED_STDINT_H
 #define _GENERATED_STDINT_H " "
-/* generated using gnu compiler arm-linux-androideabi-gcc (GCC) 4.9 20140827 (prerelease) */
+/* generated using gnu compiler Android (4751641 based on r328903) clang version 7.0.2 (https://android.googlesource.com/toolchain/clang 003100370607242ddd5815e4a043907ea9004281) (https://android.googlesource.com/toolchain/llvm 1d739ffb0366421d383e04ff80ec2ee591315116) (based on LLVM 7.0.2svn) */
+#define _STDINT_HAVE_STDINT_H 1
 
 /* ................... shortcircuit part ........................... */
 
@@ -14,16 +15,14 @@
 /* .................... configured part ............................ */
 
 /* whether we have a C99 compatible stdint header file */
-#define _STDINT_HEADER_INTPTR "stdint.h"
+/* #undef _STDINT_HEADER_INTPTR */
 /* whether we have a C96 compatible inttypes header file */
 /* #undef _STDINT_HEADER_UINT32 */
 /* whether we have a BSD compatible inet types header */
 /* #undef _STDINT_HEADER_U_INT32 */
 
-#include <stdint.h>
-
 /* which 64bit typedef has been found */
-#define   _STDINT_HAVE_UINT64_T 1
+/* #undef _STDINT_HAVE_UINT64_T */
 /* #undef _STDINT_HAVE_U_INT64_T */
 
 /* which type model has been detected */
@@ -31,11 +30,11 @@
 /* #undef _STDINT_LONG_MODEL // skipped */
 
 /* whether int_least types were detected */
-#define   _STDINT_HAVE_INT_LEAST32_T 1
+/* #undef _STDINT_HAVE_INT_LEAST32_T */
 /* whether int_fast types were detected */
-#define   _STDINT_HAVE_INT_FAST32_T 1
+/* #undef _STDINT_HAVE_INT_FAST32_T */
 /* whether intmax_t type was detected */
-#define   _STDINT_HAVE_INTMAX_T 1
+/* #undef _STDINT_HAVE_INTMAX_T */
 
 /* .................... detections part ............................ */
 
@@ -265,7 +264,7 @@ typedef unsigned long uintmax_t;
 #define __intptr_t_defined
 /* we encourage using "long" to store pointer values, never use "int" ! */
 #if   _STDINT_LONG_MODEL+0 == 242 || _STDINT_LONG_MODEL+0 == 484
-typedef  unsinged int   uintptr_t;
+typedef  unsigned int   uintptr_t;
 typedef           int    intptr_t;
 #elif _STDINT_LONG_MODEL+0 == 244 || _STDINT_LONG_MODEL+0 == 444
 typedef  unsigned long  uintptr_t;

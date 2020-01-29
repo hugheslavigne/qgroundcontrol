@@ -1,6 +1,6 @@
 /* graphene-simd4x4f.h: 4x4 float vector operations
  *
- * Copyright © 2014  Emmanuele Bassi
+ * Copyright 2014  Emmanuele Bassi
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,6 +27,7 @@
 #include "graphene-simd4f.h"
 
 #include <math.h>
+#include <float.h>
 
 GRAPHENE_BEGIN_DECLS
 
@@ -67,8 +68,7 @@ GRAPHENE_BEGIN_DECLS
  *
  * Since: 1.0
  */
-GRAPHENE_VECTORCALL
-static inline graphene_simd4x4f_t
+static inline graphene_simd4x4f_t GRAPHENE_VECTORCALL
 graphene_simd4x4f_init (graphene_simd4f_t x,
                         graphene_simd4f_t y,
                         graphene_simd4f_t z,
@@ -424,19 +424,14 @@ graphene_simd4x4f_matrix_mul (const graphene_simd4x4f_t *a,
    * better numbers while retaining the same correct results as above:
    * the scalar implementation now clocks at 91ns; the GCC vector
    * implementation is 19ns; and the SSE implementation is 16ns.
-   */
-  const graphene_simd4f_t row1 = a->x;
-  const graphene_simd4f_t row2 = a->y;
-  const graphene_simd4f_t row3 = a->z;
-  const graphene_simd4f_t row4 = a->w;
-
-  /* the order is correct if we want to multiply A with B; remember
+   *
+   * the order is correct if we want to multiply A with B; remember
    * that matrix multiplication is non-commutative.
    */
-  graphene_simd4x4f_vec4_mul (b, &row1, &res->x);
-  graphene_simd4x4f_vec4_mul (b, &row2, &res->y);
-  graphene_simd4x4f_vec4_mul (b, &row3, &res->z);
-  graphene_simd4x4f_vec4_mul (b, &row4, &res->w);
+  graphene_simd4x4f_vec4_mul (b, &a->x, &res->x);
+  graphene_simd4x4f_vec4_mul (b, &a->y, &res->y);
+  graphene_simd4x4f_vec4_mul (b, &a->z, &res->z);
+  graphene_simd4x4f_vec4_mul (b, &a->w, &res->w);
 #endif
 }
 
@@ -517,7 +512,7 @@ graphene_simd4x4f_init_ortho (graphene_simd4x4f_t *m,
  * graphene_simd4x4f_init_look_at:
  * @m: a #graphene_simd4x4f_t
  * @eye: vector for the camera coordinates
- * @center: vector the the object coordinates
+ * @center: vector for the object coordinates
  * @up: vector for the upwards direction
  *
  * Initializes a SIMD matrix with the projection necessary for
@@ -710,6 +705,9 @@ graphene_simd4x4f_rotation (graphene_simd4x4f_t *m,
   rad = -rad;
   axis = graphene_simd4f_normalize3 (axis);
 
+  /* We cannot use graphene_sincos() because it's a private function, whereas
+   * graphene-simd4x4f.h is a public header
+   */
   sine = sinf (rad);
   cosine = cosf (rad);
 
@@ -825,9 +823,11 @@ graphene_simd4x4f_div (const graphene_simd4x4f_t *a,
  *
  * Inverts the given #graphene_simd4x4f_t.
  *
+ * Returns: `true` if the matrix was invertible
+ *
  * Since: 1.0
  */
-static inline void
+static inline bool
 graphene_simd4x4f_inverse (const graphene_simd4x4f_t *m,
                            graphene_simd4x4f_t       *res)
 {
@@ -897,17 +897,24 @@ graphene_simd4x4f_inverse (const graphene_simd4x4f_t *m,
   const graphene_simd4f_t d0 = graphene_simd4f_mul (r1_sum, r0);
   const graphene_simd4f_t d1 = graphene_simd4f_add (d0, graphene_simd4f_merge_high (d0, d0));
   const graphene_simd4f_t det = graphene_simd4f_sub (d1, graphene_simd4f_splat_y (d1));
-  const graphene_simd4f_t invdet = graphene_simd4f_splat_x (graphene_simd4f_div (graphene_simd4f_splat (1.0f), det));
+  if (graphene_simd4f_get_x (det) != 0.f)
+    {
+      const graphene_simd4f_t invdet = graphene_simd4f_splat_x (graphene_simd4f_div (graphene_simd4f_splat (1.0f), det));
 
-  const graphene_simd4f_t o0 = graphene_simd4f_mul (graphene_simd4f_flip_sign_0101 (r1_sum), invdet);
-  const graphene_simd4f_t o1 = graphene_simd4f_mul (graphene_simd4f_flip_sign_1010 (r0_sum), invdet);
-  const graphene_simd4f_t o2 = graphene_simd4f_mul (graphene_simd4f_flip_sign_0101 (r3_sum), invdet);
-  const graphene_simd4f_t o3 = graphene_simd4f_mul (graphene_simd4f_flip_sign_1010 (r2_sum), invdet);
+      const graphene_simd4f_t o0 = graphene_simd4f_mul (graphene_simd4f_flip_sign_0101 (r1_sum), invdet);
+      const graphene_simd4f_t o1 = graphene_simd4f_mul (graphene_simd4f_flip_sign_1010 (r0_sum), invdet);
+      const graphene_simd4f_t o2 = graphene_simd4f_mul (graphene_simd4f_flip_sign_0101 (r3_sum), invdet);
+      const graphene_simd4f_t o3 = graphene_simd4f_mul (graphene_simd4f_flip_sign_1010 (r2_sum), invdet);
 
-  graphene_simd4x4f_t mt = graphene_simd4x4f_init (o0, o1, o2, o3);
+      graphene_simd4x4f_t mt = graphene_simd4x4f_init (o0, o1, o2, o3);
 
-  /* transpose the resulting matrix */
-  graphene_simd4x4f_transpose (&mt, res);
+      /* transpose the resulting matrix */
+      graphene_simd4x4f_transpose (&mt, res);
+
+      return true;
+    }
+
+  return false;
 }
 
 /**
@@ -1012,13 +1019,22 @@ graphene_simd4x4f_is_identity (const graphene_simd4x4f_t *m)
 static inline bool
 graphene_simd4x4f_is_2d (const graphene_simd4x4f_t *m)
 {
-  if (graphene_simd4f_get_z (m->x) != 0.f ||
-      graphene_simd4f_get_w (m->x) != 0.f ||
-      graphene_simd4f_get_z (m->y) != 0.f ||
-      graphene_simd4f_get_w (m->y) != 0.f ||
-      graphene_simd4f_cmp_neq (m->z, graphene_simd4f_init (0, 0, 1, 0)) ||
-      graphene_simd4f_get_z (m->w) != 0.f ||
-      graphene_simd4f_get_w (m->w) != 1.f)
+  float f[4];
+
+  if (!(fabsf (graphene_simd4f_get_z (m->x)) < FLT_EPSILON && fabsf (graphene_simd4f_get_w (m->x)) < FLT_EPSILON))
+    return false;
+
+  if (!(fabsf (graphene_simd4f_get_z (m->y)) < FLT_EPSILON && fabsf (graphene_simd4f_get_w (m->y)) < FLT_EPSILON))
+    return false;
+
+  graphene_simd4f_dup_4f (m->z, f);
+  if (!(fabsf (f[0]) < FLT_EPSILON &&
+        fabsf (f[1]) < FLT_EPSILON &&
+        1.f - fabsf (f[2]) < FLT_EPSILON &&
+        fabsf (f[3]) < FLT_EPSILON))
+    return false;
+
+  if (!(fabsf (graphene_simd4f_get_z (m->w)) < FLT_EPSILON && 1.f - fabsf (graphene_simd4f_get_w (m->w)) < FLT_EPSILON))
     return false;
 
   return true;

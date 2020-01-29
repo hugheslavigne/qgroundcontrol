@@ -23,10 +23,18 @@
 #define __GST_AUDIO_AUDIO_H__
 
 #include <gst/gst.h>
+#include <gst/audio/audio-prelude.h>
 #include <gst/audio/audio-enumtypes.h>
 #include <gst/audio/audio-format.h>
 #include <gst/audio/audio-channels.h>
+#include <gst/audio/audio-channel-mixer.h>
 #include <gst/audio/audio-info.h>
+#include <gst/audio/audio-buffer.h>
+#include <gst/audio/audio-quantize.h>
+#include <gst/audio/audio-converter.h>
+#include <gst/audio/audio-resampler.h>
+#include <gst/audio/gstaudiostreamalign.h>
+#include <gst/audio/gstaudioaggregator.h>
 
 G_BEGIN_DECLS
 
@@ -70,14 +78,28 @@ G_BEGIN_DECLS
  */
 #define GST_META_TAG_AUDIO_CHANNELS_STR "channels"
 
+/**
+ * GST_META_TAG_AUDIO_RATE_STR:
+ *
+ * This metadata stays relevant as long as sample rate is unchanged.
+ *
+ * Since: 1.8
+ */
+#define GST_META_TAG_AUDIO_RATE_STR "rate"
+
 /*
  * this library defines and implements some helper functions for audio
  * handling
  */
 
-GstBuffer *    gst_audio_buffer_clip     (GstBuffer *buffer, GstSegment *segment,
+GST_AUDIO_API
+GstBuffer *    gst_audio_buffer_clip     (GstBuffer *buffer,
+                                          const GstSegment *segment,
                                           gint rate, gint bpf);
 
+GST_AUDIO_API
+GstBuffer *    gst_audio_buffer_truncate (GstBuffer *buffer,
+                                          gint bpf, gsize trim, gsize samples);
 
 G_END_DECLS
 

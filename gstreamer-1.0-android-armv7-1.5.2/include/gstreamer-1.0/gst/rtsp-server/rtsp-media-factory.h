@@ -74,8 +74,8 @@ struct _GstRTSPMediaFactory {
  *       add the #GstRTSPMedia's element created by @construct to the pipeline.
  * @configure: configure the media created with @construct. The default
  *       implementation will configure the 'shared' property of the media.
- * @media_constructed: signal emited when a media was constructed
- * @media_configure: signal emited when a media should be configured
+ * @media_constructed: signal emitted when a media was constructed
+ * @media_configure: signal emitted when a media should be configured
  *
  * The #GstRTSPMediaFactory class structure.
  */
@@ -97,72 +97,174 @@ struct _GstRTSPMediaFactoryClass {
   gpointer         _gst_reserved[GST_PADDING_LARGE];
 };
 
+GST_RTSP_SERVER_API
 GType                 gst_rtsp_media_factory_get_type     (void);
 
 /* creating the factory */
+
+GST_RTSP_SERVER_API
 GstRTSPMediaFactory * gst_rtsp_media_factory_new          (void);
 
 /* configuring the factory */
+
+GST_RTSP_SERVER_API
 void                  gst_rtsp_media_factory_set_launch       (GstRTSPMediaFactory *factory,
                                                                const gchar *launch);
+
+GST_RTSP_SERVER_API
 gchar *               gst_rtsp_media_factory_get_launch       (GstRTSPMediaFactory *factory);
 
+GST_RTSP_SERVER_API
 void                  gst_rtsp_media_factory_set_permissions  (GstRTSPMediaFactory *factory,
                                                                GstRTSPPermissions *permissions);
+
+GST_RTSP_SERVER_API
 GstRTSPPermissions *  gst_rtsp_media_factory_get_permissions  (GstRTSPMediaFactory *factory);
+
+GST_RTSP_SERVER_API
 void                  gst_rtsp_media_factory_add_role         (GstRTSPMediaFactory *factory,
                                                                const gchar *role,
                                                                const gchar *fieldname, ...);
 
+GST_RTSP_SERVER_API
+void                  gst_rtsp_media_factory_add_role_from_structure (GstRTSPMediaFactory * factory,
+                                                               GstStructure *structure);
+GST_RTSP_SERVER_API
 void                  gst_rtsp_media_factory_set_shared       (GstRTSPMediaFactory *factory,
                                                                gboolean shared);
+
+GST_RTSP_SERVER_API
 gboolean              gst_rtsp_media_factory_is_shared        (GstRTSPMediaFactory *factory);
 
+GST_RTSP_SERVER_API
+void                  gst_rtsp_media_factory_set_stop_on_disconnect       (GstRTSPMediaFactory *factory,
+                                                                           gboolean stop_on_disconnect);
+
+GST_RTSP_SERVER_API
+gboolean              gst_rtsp_media_factory_is_stop_on_disonnect        (GstRTSPMediaFactory *factory);
+
+GST_RTSP_SERVER_API
 void                  gst_rtsp_media_factory_set_suspend_mode (GstRTSPMediaFactory *factory,
                                                                GstRTSPSuspendMode mode);
+
+GST_RTSP_SERVER_API
 GstRTSPSuspendMode    gst_rtsp_media_factory_get_suspend_mode (GstRTSPMediaFactory *factory);
 
+GST_RTSP_SERVER_API
 void                  gst_rtsp_media_factory_set_eos_shutdown (GstRTSPMediaFactory *factory,
                                                                gboolean eos_shutdown);
+
+GST_RTSP_SERVER_API
 gboolean              gst_rtsp_media_factory_is_eos_shutdown  (GstRTSPMediaFactory *factory);
 
+GST_RTSP_SERVER_API
 void                  gst_rtsp_media_factory_set_profiles     (GstRTSPMediaFactory *factory,
                                                                GstRTSPProfile profiles);
+
+GST_RTSP_SERVER_API
 GstRTSPProfile        gst_rtsp_media_factory_get_profiles     (GstRTSPMediaFactory *factory);
 
+GST_RTSP_SERVER_API
 void                  gst_rtsp_media_factory_set_protocols    (GstRTSPMediaFactory *factory,
                                                                GstRTSPLowerTrans protocols);
+
+GST_RTSP_SERVER_API
 GstRTSPLowerTrans     gst_rtsp_media_factory_get_protocols    (GstRTSPMediaFactory *factory);
 
+GST_RTSP_SERVER_API
 void                  gst_rtsp_media_factory_set_address_pool (GstRTSPMediaFactory * factory,
                                                                GstRTSPAddressPool * pool);
+
+GST_RTSP_SERVER_API
 GstRTSPAddressPool *  gst_rtsp_media_factory_get_address_pool (GstRTSPMediaFactory * factory);
 
+GST_RTSP_SERVER_API
+void                  gst_rtsp_media_factory_set_multicast_iface (GstRTSPMediaFactory *factory, const gchar *multicast_iface);
+
+GST_RTSP_SERVER_API
+gchar *               gst_rtsp_media_factory_get_multicast_iface (GstRTSPMediaFactory *factory);
+
+GST_RTSP_SERVER_API
 void                  gst_rtsp_media_factory_set_buffer_size  (GstRTSPMediaFactory * factory,
                                                                guint size);
+
+GST_RTSP_SERVER_API
 guint                 gst_rtsp_media_factory_get_buffer_size  (GstRTSPMediaFactory * factory);
+
+GST_RTSP_SERVER_API
 void                  gst_rtsp_media_factory_set_retransmission_time (GstRTSPMediaFactory * factory,
                                                                       GstClockTime time);
+
+GST_RTSP_SERVER_API
 GstClockTime          gst_rtsp_media_factory_get_retransmission_time (GstRTSPMediaFactory * factory);
 
+GST_RTSP_SERVER_API
+void                  gst_rtsp_media_factory_set_do_retransmission (GstRTSPMediaFactory * factory,
+                                                                    gboolean do_retransmission);
+
+GST_RTSP_SERVER_API
+gboolean              gst_rtsp_media_factory_get_do_retransmission (GstRTSPMediaFactory * factory);
+
+GST_RTSP_SERVER_API
 void                  gst_rtsp_media_factory_set_latency      (GstRTSPMediaFactory * factory,
                                                                guint                 latency);
+
+GST_RTSP_SERVER_API
 guint                 gst_rtsp_media_factory_get_latency      (GstRTSPMediaFactory * factory);
 
+GST_RTSP_SERVER_API
 void                  gst_rtsp_media_factory_set_transport_mode (GstRTSPMediaFactory *factory,
                                                                  GstRTSPTransportMode mode);
+
+GST_RTSP_SERVER_API
 GstRTSPTransportMode  gst_rtsp_media_factory_get_transport_mode (GstRTSPMediaFactory *factory);
 
+GST_RTSP_SERVER_API
 void                  gst_rtsp_media_factory_set_media_gtype  (GstRTSPMediaFactory * factory,
                                                                GType media_gtype);
+
+GST_RTSP_SERVER_API
 GType                 gst_rtsp_media_factory_get_media_gtype  (GstRTSPMediaFactory * factory);
 
+GST_RTSP_SERVER_API
+void                  gst_rtsp_media_factory_set_clock        (GstRTSPMediaFactory *factory,
+                                                               GstClock * clock);
+
+GST_RTSP_SERVER_API
+GstClock *            gst_rtsp_media_factory_get_clock        (GstRTSPMediaFactory *factory);
+
+GST_RTSP_SERVER_API
+void                    gst_rtsp_media_factory_set_publish_clock_mode (GstRTSPMediaFactory * factory, GstRTSPPublishClockMode mode);
+
+GST_RTSP_SERVER_API
+GstRTSPPublishClockMode gst_rtsp_media_factory_get_publish_clock_mode (GstRTSPMediaFactory * factory);
+
+GST_RTSP_SERVER_API
+gboolean                gst_rtsp_media_factory_set_max_mcast_ttl (GstRTSPMediaFactory * factory,
+                                                                  guint                 ttl);
+
+GST_RTSP_SERVER_API
+guint                 gst_rtsp_media_factory_get_max_mcast_ttl (GstRTSPMediaFactory * factory);
+
+GST_RTSP_SERVER_API
+void                  gst_rtsp_media_factory_set_bind_mcast_address (GstRTSPMediaFactory * factory,
+                                                                     gboolean bind_mcast_addr);
+GST_RTSP_SERVER_API
+gboolean              gst_rtsp_media_factory_is_bind_mcast_address (GstRTSPMediaFactory * factory);
+
 /* creating the media from the factory and a url */
+
+GST_RTSP_SERVER_API
 GstRTSPMedia *        gst_rtsp_media_factory_construct        (GstRTSPMediaFactory *factory,
                                                                const GstRTSPUrl *url);
 
+GST_RTSP_SERVER_API
 GstElement *          gst_rtsp_media_factory_create_element   (GstRTSPMediaFactory *factory,
                                                                const GstRTSPUrl *url);
+
+#ifdef G_DEFINE_AUTOPTR_CLEANUP_FUNC
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(GstRTSPMediaFactory, gst_object_unref)
+#endif
 
 G_END_DECLS
 

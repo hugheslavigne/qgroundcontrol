@@ -20,9 +20,11 @@
 
 #ifndef __GES_H__
 #define __GES_H__
+
 #include <glib.h>
 #include <gst/gst.h>
 
+#include <ges/ges-prelude.h>
 #include <ges/ges-types.h>
 #include <ges/ges-enums.h>
 
@@ -71,9 +73,9 @@
 #include <ges/ges-video-transition.h>
 #include <ges/ges-audio-transition.h>
 #include <ges/ges-base-effect.h>
+#include <ges/ges-effect-asset.h>
 #include <ges/ges-effect.h>
 #include <ges/ges-formatter.h>
-#include <ges/ges-pitivi-formatter.h>
 #include <ges/ges-command-line-formatter.h>
 #include <ges/ges-utils.h>
 #include <ges/ges-meta-container.h>
@@ -85,13 +87,28 @@
 G_BEGIN_DECLS
 
 
-gboolean ges_init         (void);
-gboolean ges_init_check (int *argc, char **argv[], GError ** err);
-void     ges_version      (guint * major, guint * minor, guint * micro,
-                           guint * nano);
-GOptionGroup *
-ges_init_get_option_group (void);
-gboolean ges_validate_register_action_types (void);
+GES_API
+gboolean ges_init                            (void);
+
+GES_API
+gboolean ges_init_check                      (int *argc, char **argv[], GError ** err);
+
+GES_API
+void     ges_deinit                          (void);
+
+GES_API
+void     ges_version                         (guint * major,
+                                              guint * minor,
+                                              guint * micro,
+                                              guint * nano);
+GES_API GOptionGroup *
+ges_init_get_option_group                    (void);
+
+GES_API
+gboolean ges_validate_register_action_types  (void);
+
+GES_API
+gboolean ges_is_initialized                  (void);
 
 G_END_DECLS
 

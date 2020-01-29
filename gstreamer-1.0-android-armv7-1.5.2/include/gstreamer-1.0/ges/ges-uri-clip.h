@@ -69,20 +69,25 @@ struct _GESUriClipClass {
   gpointer _ges_reserved[GES_PADDING];
 };
 
+GES_API
 GType ges_uri_clip_get_type (void);
 
-void
+GES_API void
 ges_uri_clip_set_mute (GESUriClip * self, gboolean mute);
 
-void
+GES_API void
 ges_uri_clip_set_is_image (GESUriClip * self,
     gboolean is_image);
 
+GES_API
 gboolean ges_uri_clip_is_muted (GESUriClip * self);
+GES_API
 gboolean ges_uri_clip_is_image (GESUriClip * self);
+GES_API
 const gchar *ges_uri_clip_get_uri (GESUriClip * self);
 
-GESUriClip* ges_uri_clip_new (gchar *uri);
+GES_API
+GESUriClip* ges_uri_clip_new (const gchar *uri);
 
 G_END_DECLS
 

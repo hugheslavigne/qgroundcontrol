@@ -28,6 +28,7 @@
 #include <glib-object.h>
 
 #include <gst/gstcontrolsource.h>
+#include <gst/controller/controller-prelude.h>
 
 G_BEGIN_DECLS
 
@@ -81,12 +82,16 @@ struct _GstDirectControlBinding {
   GValue cur_value;
   gdouble last_value;
   gint byte_size;
-  gboolean want_absolute;
 
   GstDirectControlBindingConvertValue convert_value;
   GstDirectControlBindingConvertGValue convert_g_value;
 
-  gpointer _gst_reserved[GST_PADDING];
+  union {
+    gpointer _gst_reserved[GST_PADDING];
+    struct {
+      gboolean want_absolute;
+    } abi;
+  } ABI;
 };
 
 /**
@@ -105,15 +110,21 @@ struct _GstDirectControlBindingClass
   gpointer _gst_reserved[GST_PADDING];
 };
 
+GST_CONTROLLER_API
 GType gst_direct_control_binding_get_type (void);
 
 /* Functions */
 
+GST_CONTROLLER_API
 GstControlBinding * gst_direct_control_binding_new (GstObject * object, const gchar * property_name,
                                                     GstControlSource * cs);
-
+GST_CONTROLLER_API
 GstControlBinding * gst_direct_control_binding_new_absolute (GstObject * object, const gchar * property_name, 
                                                     GstControlSource * cs);
+
+#ifdef G_DEFINE_AUTOPTR_CLEANUP_FUNC
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(GstDirectControlBinding, gst_object_unref)
+#endif
 
 G_END_DECLS
 

@@ -21,8 +21,11 @@
 #ifndef _GES_EXTRACTABLE_
 #define _GES_EXTRACTABLE_
 
+typedef struct _GESExtractable GESExtractable;
+
 #include <glib-object.h>
 #include <gio/gio.h>
+#include <gst/gst.h>
 #include <ges/ges-types.h>
 #include <ges/ges-asset.h>
 
@@ -34,6 +37,7 @@ G_BEGIN_DECLS
 #define GES_IS_EXTRACTABLE(obj)             (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GES_TYPE_EXTRACTABLE))
 #define GES_EXTRACTABLE_GET_INTERFACE(inst) (G_TYPE_INSTANCE_GET_INTERFACE ((inst), GES_TYPE_EXTRACTABLE, GESExtractableInterface))
 
+GES_API
 GType ges_extractable_get_type (void);
 
 /**
@@ -81,10 +85,13 @@ struct _GESExtractableInterface
   gpointer _ges_reserved[GES_PADDING];
 };
 
+GES_API
 GESAsset* ges_extractable_get_asset      (GESExtractable *self);
+GES_API
 gboolean ges_extractable_set_asset              (GESExtractable *self,
                                                 GESAsset *asset);
 
+GES_API
 gchar * ges_extractable_get_id                 (GESExtractable *self);
 
 G_END_DECLS

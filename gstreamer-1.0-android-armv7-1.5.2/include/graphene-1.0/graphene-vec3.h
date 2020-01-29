@@ -1,6 +1,6 @@
 /* graphene-vec3.h: 3-coords vector
  *
- * Copyright © 2014  Emmanuele Bassi
+ * Copyright 2014  Emmanuele Bassi
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -43,7 +43,7 @@ GRAPHENE_BEGIN_DECLS
 struct _graphene_vec3_t
 {
   /*< private >*/
-  GRAPHENE_PRIVATE_FIELD (graphene_simd4f_t, value);
+  GRAPHENE_ALIGN16 GRAPHENE_PRIVATE_FIELD (graphene_simd4f_t, value);
 };
 
 GRAPHENE_AVAILABLE_IN_1_0

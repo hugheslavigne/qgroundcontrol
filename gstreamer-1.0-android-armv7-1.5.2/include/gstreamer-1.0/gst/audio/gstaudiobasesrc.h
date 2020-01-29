@@ -62,10 +62,12 @@ typedef struct _GstAudioBaseSrc GstAudioBaseSrc;
 typedef struct _GstAudioBaseSrcClass GstAudioBaseSrcClass;
 typedef struct _GstAudioBaseSrcPrivate GstAudioBaseSrcPrivate;
 
+/* FIXME 2.0: Should be "retimestamp" not "re-timestamp" */
+
 /**
  * GstAudioBaseSrcSlaveMethod:
  * @GST_AUDIO_BASE_SRC_SLAVE_RESAMPLE: Resample to match the master clock.
- * @GST_AUDIO_BASE_SRC_SLAVE_RETIMESTAMP: Retimestamp output buffers with master
+ * @GST_AUDIO_BASE_SRC_SLAVE_RE_TIMESTAMP: Retimestamp output buffers with master
  * clock time.
  * @GST_AUDIO_BASE_SRC_SLAVE_SKEW: Adjust capture pointer when master clock
  * drifts too much.
@@ -77,12 +79,12 @@ typedef struct _GstAudioBaseSrcPrivate GstAudioBaseSrcPrivate;
 typedef enum
 {
   GST_AUDIO_BASE_SRC_SLAVE_RESAMPLE,
-  GST_AUDIO_BASE_SRC_SLAVE_RETIMESTAMP,
+  GST_AUDIO_BASE_SRC_SLAVE_RE_TIMESTAMP,
   GST_AUDIO_BASE_SRC_SLAVE_SKEW,
   GST_AUDIO_BASE_SRC_SLAVE_NONE
 } GstAudioBaseSrcSlaveMethod;
 
-#define GST_TYPE_AUDIO_BASE_SRC_SLAVE_METHOD (gst_audio_base_src_slave_method_get_type ())
+#define GST_AUDIO_BASE_SRC_SLAVE_RETIMESTAMP GST_AUDIO_BASE_SRC_SLAVE_RE_TIMESTAMP
 
 /**
  * GstAudioBaseSrc:
@@ -130,20 +132,30 @@ struct _GstAudioBaseSrcClass {
   gpointer _gst_reserved[GST_PADDING];
 };
 
-GType gst_audio_base_src_get_type(void);
-GType gst_audio_base_src_slave_method_get_type (void);
+GST_AUDIO_API
+GType      gst_audio_base_src_get_type(void);
 
+GST_AUDIO_API
 GstAudioRingBuffer *
            gst_audio_base_src_create_ringbuffer        (GstAudioBaseSrc *src);
 
+GST_AUDIO_API
 void       gst_audio_base_src_set_provide_clock        (GstAudioBaseSrc *src, gboolean provide);
+
+GST_AUDIO_API
 gboolean   gst_audio_base_src_get_provide_clock        (GstAudioBaseSrc *src);
 
+GST_AUDIO_API
 void       gst_audio_base_src_set_slave_method         (GstAudioBaseSrc *src,
                                                         GstAudioBaseSrcSlaveMethod method);
+GST_AUDIO_API
 GstAudioBaseSrcSlaveMethod
            gst_audio_base_src_get_slave_method         (GstAudioBaseSrc *src);
 
+
+#ifdef G_DEFINE_AUTOPTR_CLEANUP_FUNC
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(GstAudioBaseSrc, gst_object_unref)
+#endif
 
 G_END_DECLS
 

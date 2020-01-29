@@ -24,6 +24,7 @@
 #define __GST_RTPPAYLOADS_H__
 
 #include <gst/gst.h>
+#include <gst/rtp/rtp-prelude.h>
 
 G_BEGIN_DECLS
 
@@ -55,7 +56,6 @@ G_BEGIN_DECLS
  * @GST_RTP_PAYLOAD_MPV: Video MPEG 1 & 2 (RFC 2250)
  * @GST_RTP_PAYLOAD_MP2T: MPEG-2 transport stream (RFC 2250)
  * @GST_RTP_PAYLOAD_H263: Video H263 (RFC 2190)
- *
  *
  * Standard predefined fixed payload types.
  *
@@ -187,7 +187,10 @@ struct _GstRTPPayloadInfo
   gpointer _gst_reserved[GST_PADDING];
 };
 
+GST_RTP_API
 const GstRTPPayloadInfo *  gst_rtp_payload_info_for_pt     (guint8 payload_type);
+
+GST_RTP_API
 const GstRTPPayloadInfo *  gst_rtp_payload_info_for_name   (const gchar *media, const gchar *encoding_name);
 
 G_END_DECLS

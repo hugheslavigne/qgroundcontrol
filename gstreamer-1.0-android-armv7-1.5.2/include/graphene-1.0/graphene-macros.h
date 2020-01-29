@@ -1,6 +1,6 @@
 /* graphene-macros.h: Public macros
  *
- * Copyright © 2014  Emmanuele Bassi
+ * Copyright 2014  Emmanuele Bassi
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -46,7 +46,7 @@
 # define GRAPHENE_ALIGN16
 #endif
 
-#if defined(_MSC_VER) && (_MSC_VER >= 1800)
+#if defined(_MSC_VER) && (_MSC_VER >= 1910)
 # ifdef _M_IX86
 /* Use __vectorcall to enable SSE intrinsics on 32-bit builds on MSVC 2013 and later */
 #  define GRAPHENE_VECTORCALL   __vectorcall
@@ -55,6 +55,12 @@
 # endif
 #else
 # define GRAPHENE_VECTORCALL
+#endif
+
+#ifdef _MSC_VER
+# if !defined (__cplusplus) && defined (_MSC_VER) && (_MSC_VER < 1900)
+#  define inline __inline
+# endif
 #endif
 
 #ifdef __cplusplus

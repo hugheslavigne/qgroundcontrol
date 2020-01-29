@@ -44,7 +44,7 @@ typedef struct _GstDevicePrivate GstDevicePrivate;
 
 /**
  * GstDevice:
- * @parent: The parent #GstObject strucuture.
+ * @parent: The parent #GstObject structure.
  *
  * A device object.
  *
@@ -62,7 +62,7 @@ struct _GstDevice {
 
 /**
  * GstDeviceClass:
- * @parent_class: The parent #GstObjectClass strucuture.
+ * @parent_class: The parent #GstObjectClass structure.
  * @create_element: Creates the fully configured element to access this device.
  *  Subclasses need to override this and return a new element.
  * @reconfigure_element: This only needs to be implemented by subclasses if the
@@ -77,29 +77,45 @@ struct _GstDevice {
 struct _GstDeviceClass {
   GstObjectClass    parent_class;
 
-  GstElement * (*create_element) (GstDevice * device, const gchar * name);
-  gboolean (*reconfigure_element) (GstDevice * device, GstElement * element);
+  GstElement * (*create_element)      (GstDevice * device, const gchar * name);
+  gboolean     (*reconfigure_element) (GstDevice * device, GstElement * element);
 
   /*< private >*/
   gpointer _gst_reserved[GST_PADDING];
 };
 
-GType        gst_device_get_type (void);
+GST_API
+GType          gst_device_get_type (void);
 
-GstElement * gst_device_create_element (GstDevice * device, const gchar * name);
+GST_API
+GstElement *   gst_device_create_element      (GstDevice * device, const gchar * name);
 
-GstCaps *    gst_device_get_caps (GstDevice * device);
-gchar *      gst_device_get_display_name (GstDevice * device);
-gchar *      gst_device_get_device_class (GstDevice * device);
-gboolean     gst_device_reconfigure_element (GstDevice * device,
-                                             GstElement * element);
+GST_API
+GstCaps *      gst_device_get_caps            (GstDevice * device);
 
-gboolean      gst_device_has_classesv (GstDevice * device,
-                                       gchar ** classes);
+GST_API
+gchar *        gst_device_get_display_name    (GstDevice * device);
 
-gboolean      gst_device_has_classes (GstDevice * device,
-                                      const gchar * classes);
+GST_API
+gchar *        gst_device_get_device_class    (GstDevice * device);
 
+GST_API
+GstStructure * gst_device_get_properties      (GstDevice * device);
+
+GST_API
+gboolean       gst_device_reconfigure_element (GstDevice * device,
+                                               GstElement * element);
+GST_API
+gboolean        gst_device_has_classesv       (GstDevice * device,
+                                               gchar ** classes);
+GST_API
+gboolean        gst_device_has_classes        (GstDevice * device,
+                                               const gchar * classes);
+
+
+#ifdef G_DEFINE_AUTOPTR_CLEANUP_FUNC
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(GstDevice, gst_object_unref)
+#endif
 
 G_END_DECLS
 

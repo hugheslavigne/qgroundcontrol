@@ -46,7 +46,7 @@ G_BEGIN_DECLS
 
 typedef struct _GESTitleSourcePrivate GESTitleSourcePrivate;
 
-/** 
+/**
  * GESTitleSource:
  *
  */
@@ -64,7 +64,6 @@ struct _GESTitleSource {
  * GESTitleSourceClass:
  * @parent_class: parent class
  */
-
 struct _GESTitleSourceClass {
   GESVideoSourceClass parent_class;
 
@@ -74,36 +73,53 @@ struct _GESTitleSourceClass {
   gpointer _ges_reserved[GES_PADDING - 1];
 };
 
+GES_API
 GType ges_title_source_get_type (void);
 
+GES_API
 void ges_title_source_set_text (GESTitleSource *self,
 				     const gchar *text);
 
+GES_API
 void ges_title_source_set_font_desc (GESTitleSource *self,
 					  const gchar *font_desc);
 
+GES_API
 void ges_title_source_set_halignment (GESTitleSource *self,
 					   GESTextHAlign halign);
 
+GES_API
 void ges_title_source_set_valignment (GESTitleSource *self,
 					   GESTextVAlign valign);
 
+GES_API
 void ges_title_source_set_text_color (GESTitleSource *self,
 					   guint32 color);
+GES_API
 void ges_title_source_set_background_color (GESTitleSource *self,
 					   guint32 color);
+GES_API
 void ges_title_source_set_xpos (GESTitleSource *self,
 					   gdouble position);
+GES_API
 void ges_title_source_set_ypos (GESTitleSource *self,
 					   gdouble position);
 
+GES_API
 const gchar *ges_title_source_get_text (GESTitleSource *source);
+GES_API
 const gchar *ges_title_source_get_font_desc (GESTitleSource *source);
+GES_API
 GESTextHAlign ges_title_source_get_halignment (GESTitleSource *source);
+GES_API
 GESTextVAlign ges_title_source_get_valignment (GESTitleSource *source);
+GES_API
 const guint32 ges_title_source_get_text_color (GESTitleSource *source);
+GES_API
 const guint32 ges_title_source_get_background_color (GESTitleSource *source);
+GES_API
 const gdouble ges_title_source_get_xpos (GESTitleSource *source);
+GES_API
 const gdouble ges_title_source_get_ypos (GESTitleSource *source);
 
 G_END_DECLS

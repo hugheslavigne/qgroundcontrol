@@ -96,7 +96,12 @@ struct _GstAudioSrcClass {
   gpointer _gst_reserved[GST_PADDING];
 };
 
+GST_AUDIO_API
 GType gst_audio_src_get_type(void);
+
+#ifdef G_DEFINE_AUTOPTR_CLEANUP_FUNC
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(GstAudioSrc, gst_object_unref)
+#endif
 
 G_END_DECLS
 

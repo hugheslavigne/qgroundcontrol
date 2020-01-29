@@ -1,4 +1,4 @@
- 
+
 /* -*- Mode: C; indent-tabs-mode: nil; c-basic-offset: 4; tab-width: 4 -*-  */
 /*
  * gst-editing-services
@@ -54,6 +54,7 @@ struct _GESEffectAsset
   gpointer _ges_reserved[GES_PADDING];
 };
 
+GES_API
 GType ges_effect_asset_get_type (void) G_GNUC_CONST;
 
 G_END_DECLS

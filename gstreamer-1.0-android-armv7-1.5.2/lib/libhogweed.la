@@ -5,10 +5,10 @@
 # It is necessary for linking the library.
 
 # The name that we can dlopen(3).
-dlname='libhogweed.so.2'
+dlname='libhogweed.so.4'
 
 # Names of this library.
-library_names='libhogweed.so.2.0 libhogweed.so.2 libhogweed.so'
+library_names='libhogweed.so.4.2 libhogweed.so.4 libhogweed.so'
 
 # The name of the static archive.
 old_library='libhogweed.a'
@@ -17,7 +17,7 @@ old_library='libhogweed.a'
 inherited_linker_flags=''
 
 # Libraries that this one depends upon.
-dependency_libs=' /home/slomo/cerbero/dist/android_armv7/lib/libnettle.la  /home/slomo/cerbero/dist/android_armv7/lib/libgmp.la  /home/slomo/cerbero/dist/android_armv7/lib/libiconv.la  /home/slomo/cerbero/dist/android_armv7/lib/libintl.la -lc'
+dependency_libs=' /home/cerbero/cerbero/build/dist/android_universal/armv7/lib/libnettle.la  /home/cerbero/cerbero/build/dist/android_universal/armv7/lib/libgmp.la  /home/cerbero/cerbero/build/dist/android_universal/armv7/lib/libintl.la -lc'
 
 # Names of additional weak libraries provided by this library
 weak_library_names=''
@@ -25,7 +25,7 @@ weak_library_names=''
 # Version information for libglib-2.0.
 current=2
 age=2
-revision=0
+revision=
 
 # Is this an already installed library?
 installed=yes
@@ -38,4 +38,4 @@ dlopen=''
 dlpreopen=''
 
 # Directory that this library needs to be installed in:
-libdir='/home/slomo/cerbero/dist/android_armv7/lib'
+libdir='/home/cerbero/cerbero/build/dist/android_universal/armv7/lib'

@@ -55,7 +55,7 @@
  *
  * Since: 1.0
  */
-#define GRAPHENE_MINOR_VERSION          (2)
+#define GRAPHENE_MINOR_VERSION          (8)
 
 /**
  * GRAPHENE_MICRO_VERSION:

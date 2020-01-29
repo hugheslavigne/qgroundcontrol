@@ -24,7 +24,9 @@
 #ifndef _LV_TIME_H
 #define _LV_TIME_H
 
+#ifndef _MSC_VER
 #include <sys/time.h>
+#endif
 #include <time.h>
 
 #include <libvisual/lv_common.h>
@@ -103,7 +105,7 @@ int visual_timer_has_passed_by_values (VisTimer *timer, long sec, long usec);
  */
 static inline void visual_timer_tsc_get (uint32_t *lo, uint32_t *hi)
 {
-#if defined(VISUAL_ARCH_X86) || defined(VISUAL_ARCH_X86_64)
+#if !defined(_MSC_VER) && (defined(VISUAL_ARCH_X86) || defined(VISUAL_ARCH_X86_64))
 	__asm __volatile
 		("\n\t cpuid"
 		 "\n\t rdtsc"

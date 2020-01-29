@@ -24,6 +24,8 @@
 #ifndef __GST_RTSP_SESSION_MEDIA_H__
 #define __GST_RTSP_SESSION_MEDIA_H__
 
+#include "rtsp-server-prelude.h"
+
 G_BEGIN_DECLS
 
 #define GST_TYPE_RTSP_SESSION_MEDIA              (gst_rtsp_session_media_get_type ())
@@ -61,36 +63,60 @@ struct _GstRTSPSessionMediaClass
   gpointer _gst_reserved[GST_PADDING];
 };
 
+GST_RTSP_SERVER_API
 GType                    gst_rtsp_session_media_get_type       (void);
 
+GST_RTSP_SERVER_API
 GstRTSPSessionMedia *    gst_rtsp_session_media_new            (const gchar *path,
                                                                 GstRTSPMedia *media);
 
+GST_RTSP_SERVER_API
 gboolean                 gst_rtsp_session_media_matches        (GstRTSPSessionMedia *media,
                                                                 const gchar *path,
                                                                 gint * matched);
+
+GST_RTSP_SERVER_API
 GstRTSPMedia *           gst_rtsp_session_media_get_media      (GstRTSPSessionMedia *media);
 
+GST_RTSP_SERVER_API
 GstClockTime             gst_rtsp_session_media_get_base_time  (GstRTSPSessionMedia *media);
 /* control media */
+
+GST_RTSP_SERVER_API
 gboolean                 gst_rtsp_session_media_set_state      (GstRTSPSessionMedia *media,
                                                                 GstState state);
 
+GST_RTSP_SERVER_API
 void                     gst_rtsp_session_media_set_rtsp_state (GstRTSPSessionMedia *media,
                                                                 GstRTSPState state);
+
+GST_RTSP_SERVER_API
 GstRTSPState             gst_rtsp_session_media_get_rtsp_state (GstRTSPSessionMedia *media);
 
 /* get stream transport config */
+
+GST_RTSP_SERVER_API
 GstRTSPStreamTransport * gst_rtsp_session_media_set_transport  (GstRTSPSessionMedia *media,
                                                                 GstRTSPStream *stream,
                                                                 GstRTSPTransport *tr);
+
+GST_RTSP_SERVER_API
 GstRTSPStreamTransport * gst_rtsp_session_media_get_transport  (GstRTSPSessionMedia *media,
                                                                 guint idx);
 
+GST_RTSP_SERVER_API
+GPtrArray *              gst_rtsp_session_media_get_transports (GstRTSPSessionMedia *media);
+
+GST_RTSP_SERVER_API
 gboolean                 gst_rtsp_session_media_alloc_channels (GstRTSPSessionMedia *media,
                                                                 GstRTSPRange *range);
 
+GST_RTSP_SERVER_API
 gchar *                  gst_rtsp_session_media_get_rtpinfo    (GstRTSPSessionMedia * media);
+
+#ifdef G_DEFINE_AUTOPTR_CLEANUP_FUNC
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(GstRTSPSessionMedia, gst_object_unref)
+#endif
 
 G_END_DECLS
 

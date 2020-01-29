@@ -1,6 +1,6 @@
 /* graphene-plane.h: A plane in 3D space
  *
- * Copyright © 2014  Emmanuele Bassi
+ * Copyright 2014  Emmanuele Bassi
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -82,8 +82,8 @@ GRAPHENE_AVAILABLE_IN_1_2
 void                            graphene_plane_negate           (const graphene_plane_t   *p,
                                                                  graphene_plane_t         *res);
 GRAPHENE_AVAILABLE_IN_1_2
-bool                            graphene_plane_equal            (const graphene_plane_t   *p1,
-                                                                 const graphene_plane_t   *p2);
+bool                            graphene_plane_equal            (const graphene_plane_t   *a,
+                                                                 const graphene_plane_t   *b);
 GRAPHENE_AVAILABLE_IN_1_2
 float                           graphene_plane_distance         (const graphene_plane_t   *p,
                                                                  const graphene_point3d_t *point);

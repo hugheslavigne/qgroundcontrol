@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2006 Evgeniy Stepanov <eugeni.stepanov@gmail.com>
+ * Copyright (C) 2011 Grigori Goronzy <greg@chown.ath.cx>
  *
  * This file is part of libass.
  *
@@ -23,7 +24,11 @@
 #include <stdarg.h>
 #include "ass_types.h"
 
-#define LIBASS_VERSION 0x01201000
+#define LIBASS_VERSION 0x01307000
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /*
  * A linked list of images produced by an ass renderer.
@@ -92,8 +97,79 @@ typedef enum {
  * ass_set_selective_style_override_enabled() for details.
  */
 typedef enum {
-    ASS_OVERRIDE_BIT_STYLE = 1,
-    ASS_OVERRIDE_BIT_FONT_SIZE = 2,
+    /**
+     * Default mode (with no other bits set). All selective override features
+     * as well as the style set with ass_set_selective_style_override() are
+     * disabled, but traditional overrides like ass_set_font_scale() are
+     * applied unconditionally.
+     */
+    ASS_OVERRIDE_DEFAULT = 0,
+    /**
+     * Apply the style as set with ass_set_selective_style_override() on events
+     * which look like dialogue. Other style overrides are also applied this
+     * way, except ass_set_font_scale(). How ass_set_font_scale() is applied
+     * depends on the ASS_OVERRIDE_BIT_SELECTIVE_FONT_SCALE flag.
+     *
+     * This is equivalent to setting all of the following bits:
+     *
+     * ASS_OVERRIDE_BIT_FONT_NAME
+     * ASS_OVERRIDE_BIT_FONT_SIZE_FIELDS
+     * ASS_OVERRIDE_BIT_COLORS
+     * ASS_OVERRIDE_BIT_BORDER
+     * ASS_OVERRIDE_BIT_ATTRIBUTES
+     */
+    ASS_OVERRIDE_BIT_STYLE = 1 << 0,
+    /**
+     * Apply ass_set_font_scale() only on events which look like dialogue.
+     * If not set, the font scale is applied to all events. (The behavior and
+     * name of this flag are unintuitive, but exist for compatibility)
+     */
+    ASS_OVERRIDE_BIT_SELECTIVE_FONT_SCALE = 1 << 1,
+    /**
+     * Old alias for ASS_OVERRIDE_BIT_SELECTIVE_FONT_SCALE. Deprecated. Do not use.
+     */
+    ASS_OVERRIDE_BIT_FONT_SIZE = 1 << 1,
+    /**
+     * On dialogue events override: FontSize, Spacing, Blur, ScaleX, ScaleY
+     */
+    ASS_OVERRIDE_BIT_FONT_SIZE_FIELDS = 1 << 2,
+    /**
+     * On dialogue events override: FontName, treat_fontname_as_pattern
+     */
+    ASS_OVERRIDE_BIT_FONT_NAME = 1 << 3,
+    /**
+     * On dialogue events override: PrimaryColour, SecondaryColour, OutlineColour, BackColour
+     */
+    ASS_OVERRIDE_BIT_COLORS = 1 << 4,
+    /**
+     * On dialogue events override: Bold, Italic, Underline, StrikeOut
+     */
+    ASS_OVERRIDE_BIT_ATTRIBUTES = 1 << 5,
+    /**
+     * On dialogue events override: BorderStyle, Outline, Shadow
+     */
+    ASS_OVERRIDE_BIT_BORDER = 1 << 6,
+    /**
+     * On dialogue events override: Alignment
+     */
+    ASS_OVERRIDE_BIT_ALIGNMENT = 1 << 7,
+    /**
+     * On dialogue events override: MarginL, MarginR, MarginV
+     */
+    ASS_OVERRIDE_BIT_MARGINS = 1 << 8,
+    /**
+     * Unconditionally replace all fields of all styles with the one provided
+     * with ass_set_selective_style_override().
+     * Does not apply ASS_OVERRIDE_BIT_SELECTIVE_FONT_SCALE.
+     * Add ASS_OVERRIDE_BIT_FONT_SIZE_FIELDS and ASS_OVERRIDE_BIT_BORDER if
+     * you want FontSize, Spacing, Outline, Shadow to be scaled to the script
+     * resolution given by the ASS_Track.
+     */
+    ASS_OVERRIDE_FULL_STYLE = 1 << 9,
+    /**
+     * On dialogue events override: Justify
+     */
+    ASS_OVERRIDE_BIT_JUSTIFY = 1 << 10,
 } ASS_OverrideBits;
 
 /**
@@ -102,6 +178,24 @@ typedef enum {
  * \return library version
  */
 int ass_library_version(void);
+
+/**
+ * \brief Default Font provider to load fonts in libass' database
+ *
+ * NONE don't use any default font provider for font lookup
+ * AUTODETECT use the first available font provider
+ * CORETEXT force a CoreText based font provider (OS X only)
+ * FONTCONFIG force a Fontconfig based font provider
+ *
+ * libass uses the best shaper available by default.
+ */
+typedef enum {
+    ASS_FONTPROVIDER_NONE       = 0,
+    ASS_FONTPROVIDER_AUTODETECT = 1,
+    ASS_FONTPROVIDER_CORETEXT,
+    ASS_FONTPROVIDER_FONTCONFIG,
+    ASS_FONTPROVIDER_DIRECTWRITE,
+} ASS_DefaultFontProvider;
 
 /**
  * \brief Initialize the library.
@@ -312,11 +406,29 @@ void ass_set_line_spacing(ASS_Renderer *priv, double line_spacing);
 void ass_set_line_position(ASS_Renderer *priv, double line_position);
 
 /**
+ * \brief Get the list of available font providers. The output array
+ * is allocated with malloc and can be released with free(). If an
+ * allocation error occurs, size is set to (size_t)-1.
+ * \param priv library handle
+ * \param providers output, list of default providers (malloc'ed array)
+ * \param size output, number of providers
+ * \return list of available font providers (user owns the returned array)
+ */
+void ass_get_available_font_providers(ASS_Library *priv,
+                                      ASS_DefaultFontProvider **providers,
+                                      size_t *size);
+
+/**
  * \brief Set font lookup defaults.
  * \param default_font path to default font to use. Must be supplied if
  * fontconfig is disabled or unavailable.
  * \param default_family fallback font family for fontconfig, or NULL
- * \param fc whether to use fontconfig
+ * \param dfp which font provider to use (one of ASS_DefaultFontProvider). In
+ * older libass version, this could be 0 or 1, where 1 enabled fontconfig.
+ * Newer relases also accept 0 (ASS_FONTPROVIDER_NONE) and 1
+ * (ASS_FONTPROVIDER_AUTODETECT), which is almost backward-compatible.
+ * If the requested fontprovider does not exist or fails to initialize, the
+ * behavior is the same as when ASS_FONTPROVIDER_NONE was passed.
  * \param config path to fontconfig configuration file, or NULL.  Only relevant
  * if fontconfig is used.
  * \param update whether fontconfig cache should be built/updated now.  Only
@@ -325,8 +437,8 @@ void ass_set_line_position(ASS_Renderer *priv, double line_position);
  * NOTE: font lookup must be configured before an ASS_Renderer can be used.
  */
 void ass_set_fonts(ASS_Renderer *priv, const char *default_font,
-                   const char *default_family, int fc, const char *config,
-                   int update);
+                   const char *default_family, int dfp,
+                   const char *config, int update);
 
 /**
  * \brief Set selective style override mode.
@@ -341,19 +453,7 @@ void ass_set_fonts(ASS_Renderer *priv, const char *default_font,
  *          only be implemented on "best effort" basis, and has to rely on
  *          heuristics that can easily break.
  * \param priv renderer handle
- * \param bits bit mask comprised of ASS_OverrideBits values. If the value is
- *  0, all override features are disabled, and libass will behave like libass
- *  versions before this feature was introduced. Possible values:
- *      ASS_OVERRIDE_BIT_STYLE: apply the style as set with
- *          ass_set_selective_style_override() on events which look like
- *          dialogue. Other style overrides are also applied this way, except
- *          ass_set_font_scale(). How ass_set_font_scale() is applied depends
- *          on the ASS_OVERRIDE_BIT_FONT_SIZE flag.
- *      ASS_OVERRIDE_BIT_FONT_SIZE: apply ass_set_font_scale() only on events
- *          which look like dialogue. If not set, it is applied to all
- *          events.
- *      0: ignore ass_set_selective_style_override(), but apply all other
- *          overrides (traditional behavior).
+ * \param bits bit mask comprised of ASS_OverrideBits values.
  */
 void ass_set_selective_style_override_enabled(ASS_Renderer *priv, int bits);
 
@@ -367,8 +467,8 @@ void ass_set_selective_style_override_enabled(ASS_Renderer *priv, int bits);
 void ass_set_selective_style_override(ASS_Renderer *priv, ASS_Style *style);
 
 /**
- * \brief Update/build font cache.  This needs to be called if it was
- * disabled when ass_set_fonts was set.
+ * \brief This is a stub and does nothing. Old documentation: Update/build font
+ * cache.  This needs to be called if it was disabled when ass_set_fonts was set.
  *
  * \param priv renderer handle
  * \return success
@@ -466,6 +566,11 @@ void ass_process_codec_private(ASS_Track *track, char *data, int size);
 /**
  * \brief Parse a chunk of subtitle stream data. A chunk contains exactly one
  * event in Matroska format.  See the Matroska specification for details.
+ * In later libass versions (since LIBASS_VERSION==0x01300001), using this
+ * function means you agree not to modify events manually, or using other
+ * functions manipulating the event list like ass_process_data(). If you do
+ * anyway, the internal duplicate checking might break. Calling
+ * ass_flush_events() is still allowed.
  * \param track track
  * \param data string to parse
  * \param size length of data
@@ -474,6 +579,17 @@ void ass_process_codec_private(ASS_Track *track, char *data, int size);
  */
 void ass_process_chunk(ASS_Track *track, char *data, int size,
                        long long timecode, long long duration);
+
+/**
+ * \brief Set whether the ReadOrder field when processing a packet with
+ * ass_process_chunk() should be used for eliminating duplicates.
+ * \param check_readorder 0 means do not try to eliminate duplicates; 1 means
+ * use the ReadOrder field embedded in the packet as unique identifier, and
+ * discard the packet if there was already a packet with the same ReadOrder.
+ * Other values are undefined.
+ * If this function is not called, the default value is 1.
+ */
+void ass_set_check_readorder(ASS_Track *track, int check_readorder);
 
 /**
  * \brief Flush buffered events.
@@ -535,5 +651,9 @@ void ass_clear_fonts(ASS_Library *library);
  * \return timeshift in milliseconds
  */
 long long ass_step_sub(ASS_Track *track, long long now, int movement);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* LIBASS_ASS_H */

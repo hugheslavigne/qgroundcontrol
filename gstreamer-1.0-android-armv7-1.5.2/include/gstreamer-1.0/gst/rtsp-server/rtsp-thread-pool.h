@@ -40,6 +40,7 @@ G_BEGIN_DECLS
 #define GST_RTSP_THREAD_POOL_CAST(obj)         ((GstRTSPThreadPool*)(obj))
 #define GST_RTSP_THREAD_POOL_CLASS_CAST(klass) ((GstRTSPThreadPoolClass*)(klass))
 
+GST_RTSP_SERVER_API
 GType gst_rtsp_thread_get_type (void);
 
 #define GST_TYPE_RTSP_THREAD        (gst_rtsp_thread_get_type ())
@@ -77,9 +78,13 @@ struct _GstRTSPThread {
   GMainLoop *loop;
 };
 
+GST_RTSP_SERVER_API
 GstRTSPThread *   gst_rtsp_thread_new      (GstRTSPThreadType type);
 
+GST_RTSP_SERVER_API
 gboolean          gst_rtsp_thread_reuse    (GstRTSPThread * thread);
+
+GST_RTSP_SERVER_API
 void              gst_rtsp_thread_stop     (GstRTSPThread * thread);
 
 /**
@@ -90,10 +95,6 @@ void              gst_rtsp_thread_stop     (GstRTSPThread * thread);
  *
  * Returns: (transfer full): @thread (for convenience when doing assignments)
  */
-#ifdef _FOOL_GTK_DOC_
-G_INLINE_FUNC GstRTSPThread * gst_rtsp_thread_ref (GstRTSPThread * thread);
-#endif
-
 static inline GstRTSPThread *
 gst_rtsp_thread_ref (GstRTSPThread * thread)
 {
@@ -106,11 +107,6 @@ gst_rtsp_thread_ref (GstRTSPThread * thread)
  *
  * Decrease the refcount of an thread, freeing it if the refcount reaches 0.
  */
-#ifdef _FOOL_GTK_DOC_
-G_INLINE_FUNC void gst_rtsp_thread_unref (GstRTSPPermissions * thread);
-#endif
-
-
 static inline void
 gst_rtsp_thread_unref (GstRTSPThread * thread)
 {
@@ -163,17 +159,33 @@ struct _GstRTSPThreadPoolClass {
   gpointer         _gst_reserved[GST_PADDING];
 };
 
+GST_RTSP_SERVER_API
 GType               gst_rtsp_thread_pool_get_type        (void);
 
+GST_RTSP_SERVER_API
 GstRTSPThreadPool * gst_rtsp_thread_pool_new             (void);
 
+GST_RTSP_SERVER_API
 void                gst_rtsp_thread_pool_set_max_threads (GstRTSPThreadPool * pool, gint max_threads);
+
+GST_RTSP_SERVER_API
 gint                gst_rtsp_thread_pool_get_max_threads (GstRTSPThreadPool * pool);
 
+GST_RTSP_SERVER_API
 GstRTSPThread *     gst_rtsp_thread_pool_get_thread      (GstRTSPThreadPool *pool,
                                                           GstRTSPThreadType type,
                                                           GstRTSPContext *ctx);
+
+GST_RTSP_SERVER_API
 void                gst_rtsp_thread_pool_cleanup         (void);
+#ifdef G_DEFINE_AUTOPTR_CLEANUP_FUNC
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(GstRTSPThread, gst_rtsp_thread_unref)
+#endif
+
+#ifdef G_DEFINE_AUTOPTR_CLEANUP_FUNC
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(GstRTSPThreadPool, gst_object_unref)
+#endif
+
 G_END_DECLS
 
 #endif /* __GST_RTSP_THREAD_POOL_H__ */

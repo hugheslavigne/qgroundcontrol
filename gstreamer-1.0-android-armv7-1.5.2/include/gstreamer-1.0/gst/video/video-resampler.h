@@ -21,6 +21,7 @@
 #define __GST_VIDEO_RESAMPLER_H__
 
 #include <gst/gst.h>
+#include <gst/video/video-prelude.h>
 
 G_BEGIN_DECLS
 
@@ -116,6 +117,9 @@ typedef enum {
 /**
  * GstVideoResamplerFlags:
  * @GST_VIDEO_RESAMPLER_FLAG_NONE: no flags
+ * @GST_VIDEO_RESAMPLER_FLAG_HALF_TAPS: when no taps are given, half the
+ *              number of calculated taps. This can be used when making scalers
+ *              for the different fields of an interlaced picture. Since: 1.10
  *
  * Different resampler flags.
  *
@@ -123,6 +127,7 @@ typedef enum {
  */
 typedef enum {
   GST_VIDEO_RESAMPLER_FLAG_NONE                 = (0),
+  GST_VIDEO_RESAMPLER_FLAG_HALF_TAPS            = (1 << 0),
 } GstVideoResamplerFlags;
 
 /**
@@ -156,6 +161,7 @@ struct _GstVideoResampler
 };
 
 
+GST_VIDEO_API
 gboolean    gst_video_resampler_init      (GstVideoResampler *resampler,
                                            GstVideoResamplerMethod method,
                                            GstVideoResamplerFlags flags,
@@ -164,6 +170,7 @@ gboolean    gst_video_resampler_init      (GstVideoResampler *resampler,
                                            guint in_size, guint out_size,
                                            GstStructure *options);
 
+GST_VIDEO_API
 void        gst_video_resampler_clear     (GstVideoResampler *resampler);
 
 G_END_DECLS

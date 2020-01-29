@@ -70,9 +70,10 @@ struct _GESEffectClipClass {
   gpointer _ges_reserved[GES_PADDING];
 };
 
+GES_API
 GType ges_effect_clip_get_type (void);
 
-GESEffectClip *
+GES_API GESEffectClip *
 ges_effect_clip_new (const gchar * video_bin_description,
 				      const gchar * audio_bin_description);
 

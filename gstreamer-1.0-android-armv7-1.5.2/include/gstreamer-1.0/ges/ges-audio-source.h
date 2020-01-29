@@ -83,6 +83,7 @@ struct _GESAudioSourceClass {
   gpointer _ges_reserved[GES_PADDING];
 };
 
+GES_API
 GType ges_audio_source_get_type (void);
 
 G_END_DECLS

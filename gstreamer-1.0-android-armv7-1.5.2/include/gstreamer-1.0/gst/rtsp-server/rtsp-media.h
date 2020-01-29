@@ -24,6 +24,8 @@
 #ifndef __GST_RTSP_MEDIA_H__
 #define __GST_RTSP_MEDIA_H__
 
+#include "rtsp-server-prelude.h"
+
 G_BEGIN_DECLS
 
 /* types for the media */
@@ -88,11 +90,31 @@ typedef enum {
   GST_RTSP_TRANSPORT_MODE_RECORD  = 2,
 } GstRTSPTransportMode;
 
+/**
+ * GstRTSPPublishClockMode:
+ * @GST_RTSP_PUBLISH_CLOCK_MODE_NONE: Publish nothing
+ * @GST_RTSP_PUBLISH_CLOCK_MODE_CLOCK: Publish the clock but not the offset
+ * @GST_RTSP_PUBLISH_CLOCK_MODE_CLOCK_AND_OFFSET: Publish the clock and offset
+ *
+ * Whether the clock and possibly RTP/clock offset should be published according to RFC7273.
+ */
+typedef enum {
+  GST_RTSP_PUBLISH_CLOCK_MODE_NONE,
+  GST_RTSP_PUBLISH_CLOCK_MODE_CLOCK,
+  GST_RTSP_PUBLISH_CLOCK_MODE_CLOCK_AND_OFFSET
+} GstRTSPPublishClockMode;
+
 #define GST_TYPE_RTSP_TRANSPORT_MODE (gst_rtsp_transport_mode_get_type())
+GST_RTSP_SERVER_API
 GType gst_rtsp_transport_mode_get_type (void);
 
 #define GST_TYPE_RTSP_SUSPEND_MODE (gst_rtsp_suspend_mode_get_type())
+GST_RTSP_SERVER_API
 GType gst_rtsp_suspend_mode_get_type (void);
+
+#define GST_TYPE_RTSP_PUBLISH_CLOCK_MODE (gst_rtsp_publish_clock_mode_get_type())
+GST_RTSP_SERVER_API
+GType gst_rtsp_publish_clock_mode_get_type (void);
 
 #include "rtsp-stream.h"
 #include "rtsp-thread-pool.h"
@@ -169,94 +191,224 @@ struct _GstRTSPMediaClass {
   gpointer         _gst_reserved[GST_PADDING_LARGE-1];
 };
 
+GST_RTSP_SERVER_API
 GType                 gst_rtsp_media_get_type         (void);
 
 /* creating the media */
+
+GST_RTSP_SERVER_API
 GstRTSPMedia *        gst_rtsp_media_new              (GstElement *element);
+
+GST_RTSP_SERVER_API
 GstElement *          gst_rtsp_media_get_element      (GstRTSPMedia *media);
 
+GST_RTSP_SERVER_API
 void                  gst_rtsp_media_take_pipeline    (GstRTSPMedia *media, GstPipeline *pipeline);
 
+GST_RTSP_SERVER_API
 GstRTSPMediaStatus    gst_rtsp_media_get_status       (GstRTSPMedia *media);
 
+GST_RTSP_SERVER_API
 void                  gst_rtsp_media_set_permissions  (GstRTSPMedia *media,
                                                        GstRTSPPermissions *permissions);
+
+GST_RTSP_SERVER_API
 GstRTSPPermissions *  gst_rtsp_media_get_permissions  (GstRTSPMedia *media);
 
+GST_RTSP_SERVER_API
 void                  gst_rtsp_media_set_shared       (GstRTSPMedia *media, gboolean shared);
+
+GST_RTSP_SERVER_API
 gboolean              gst_rtsp_media_is_shared        (GstRTSPMedia *media);
 
+GST_RTSP_SERVER_API
+void                  gst_rtsp_media_set_stop_on_disconnect (GstRTSPMedia *media, gboolean stop_on_disconnect);
+
+GST_RTSP_SERVER_API
+gboolean              gst_rtsp_media_is_stop_on_disconnect  (GstRTSPMedia *media);
+
+GST_RTSP_SERVER_API
 void                  gst_rtsp_media_set_transport_mode  (GstRTSPMedia *media, GstRTSPTransportMode mode);
+
+GST_RTSP_SERVER_API
 GstRTSPTransportMode  gst_rtsp_media_get_transport_mode  (GstRTSPMedia *media);
 
+GST_RTSP_SERVER_API
 void                  gst_rtsp_media_set_reusable     (GstRTSPMedia *media, gboolean reusable);
+
+GST_RTSP_SERVER_API
 gboolean              gst_rtsp_media_is_reusable      (GstRTSPMedia *media);
 
+GST_RTSP_SERVER_API
 void                  gst_rtsp_media_set_profiles     (GstRTSPMedia *media, GstRTSPProfile profiles);
+
+GST_RTSP_SERVER_API
 GstRTSPProfile        gst_rtsp_media_get_profiles     (GstRTSPMedia *media);
 
+GST_RTSP_SERVER_API
 void                  gst_rtsp_media_set_protocols    (GstRTSPMedia *media, GstRTSPLowerTrans protocols);
+
+GST_RTSP_SERVER_API
 GstRTSPLowerTrans     gst_rtsp_media_get_protocols    (GstRTSPMedia *media);
 
+GST_RTSP_SERVER_API
 void                  gst_rtsp_media_set_eos_shutdown (GstRTSPMedia *media, gboolean eos_shutdown);
+
+GST_RTSP_SERVER_API
 gboolean              gst_rtsp_media_is_eos_shutdown  (GstRTSPMedia *media);
 
+GST_RTSP_SERVER_API
 void                  gst_rtsp_media_set_address_pool (GstRTSPMedia *media, GstRTSPAddressPool *pool);
+
+GST_RTSP_SERVER_API
 GstRTSPAddressPool *  gst_rtsp_media_get_address_pool (GstRTSPMedia *media);
 
+GST_RTSP_SERVER_API
+void                  gst_rtsp_media_set_multicast_iface (GstRTSPMedia *media, const gchar *multicast_iface);
+
+GST_RTSP_SERVER_API
+gchar *               gst_rtsp_media_get_multicast_iface (GstRTSPMedia *media);
+
+GST_RTSP_SERVER_API
 void                  gst_rtsp_media_set_buffer_size  (GstRTSPMedia *media, guint size);
+
+GST_RTSP_SERVER_API
 guint                 gst_rtsp_media_get_buffer_size  (GstRTSPMedia *media);
 
+GST_RTSP_SERVER_API
 void                  gst_rtsp_media_set_retransmission_time  (GstRTSPMedia *media, GstClockTime time);
+
+GST_RTSP_SERVER_API
 GstClockTime          gst_rtsp_media_get_retransmission_time  (GstRTSPMedia *media);
 
+GST_RTSP_SERVER_API
+void                  gst_rtsp_media_set_do_retransmission (GstRTSPMedia * media,
+                                                            gboolean do_retransmission);
+
+GST_RTSP_SERVER_API
+gboolean              gst_rtsp_media_get_do_retransmission (GstRTSPMedia * media);
+
+GST_RTSP_SERVER_API
 void                  gst_rtsp_media_set_latency      (GstRTSPMedia *media, guint latency);
+
+GST_RTSP_SERVER_API
 guint                 gst_rtsp_media_get_latency      (GstRTSPMedia *media);
 
+GST_RTSP_SERVER_API
 void                  gst_rtsp_media_use_time_provider (GstRTSPMedia *media, gboolean time_provider);
+
+GST_RTSP_SERVER_API
 gboolean              gst_rtsp_media_is_time_provider  (GstRTSPMedia *media);
+
+GST_RTSP_SERVER_API
 GstNetTimeProvider *  gst_rtsp_media_get_time_provider (GstRTSPMedia *media,
                                                         const gchar *address, guint16 port);
 
+GST_RTSP_SERVER_API
+void                  gst_rtsp_media_set_clock         (GstRTSPMedia *media, GstClock * clock);
+
+
+GST_RTSP_SERVER_API
+void                    gst_rtsp_media_set_publish_clock_mode (GstRTSPMedia * media, GstRTSPPublishClockMode mode);
+
+GST_RTSP_SERVER_API
+GstRTSPPublishClockMode gst_rtsp_media_get_publish_clock_mode (GstRTSPMedia * media);
+
+GST_RTSP_SERVER_API
+gboolean                gst_rtsp_media_set_max_mcast_ttl  (GstRTSPMedia *media, guint ttl);
+
+GST_RTSP_SERVER_API
+guint                 gst_rtsp_media_get_max_mcast_ttl  (GstRTSPMedia *media);
+
+GST_RTSP_SERVER_API
+void                  gst_rtsp_media_set_bind_mcast_address  (GstRTSPMedia *media, gboolean bind_mcast_addr);
+GST_RTSP_SERVER_API
+gboolean              gst_rtsp_media_is_bind_mcast_address  (GstRTSPMedia *media);
+
 /* prepare the media for playback */
+
+GST_RTSP_SERVER_API
 gboolean              gst_rtsp_media_prepare          (GstRTSPMedia *media, GstRTSPThread *thread);
+
+GST_RTSP_SERVER_API
 gboolean              gst_rtsp_media_unprepare        (GstRTSPMedia *media);
 
+GST_RTSP_SERVER_API
 void                  gst_rtsp_media_set_suspend_mode (GstRTSPMedia *media, GstRTSPSuspendMode mode);
+
+GST_RTSP_SERVER_API
 GstRTSPSuspendMode    gst_rtsp_media_get_suspend_mode (GstRTSPMedia *media);
 
+GST_RTSP_SERVER_API
 gboolean              gst_rtsp_media_suspend          (GstRTSPMedia *media);
+
+GST_RTSP_SERVER_API
 gboolean              gst_rtsp_media_unsuspend        (GstRTSPMedia *media);
 
+GST_RTSP_SERVER_API
 gboolean              gst_rtsp_media_setup_sdp        (GstRTSPMedia * media, GstSDPMessage * sdp,
                                                        GstSDPInfo * info);
 
+GST_RTSP_SERVER_API
 gboolean              gst_rtsp_media_handle_sdp (GstRTSPMedia * media, GstSDPMessage * sdp);
 
-
 /* creating streams */
+
+GST_RTSP_SERVER_API
 void                  gst_rtsp_media_collect_streams  (GstRTSPMedia *media);
+
+GST_RTSP_SERVER_API
 GstRTSPStream *       gst_rtsp_media_create_stream    (GstRTSPMedia *media,
                                                        GstElement *payloader,
-                                                       GstPad *srcpad);
+                                                       GstPad *pad);
 
 /* dealing with the media */
+
+GST_RTSP_SERVER_API
 GstClock *            gst_rtsp_media_get_clock        (GstRTSPMedia *media);
+
+GST_RTSP_SERVER_API
 GstClockTime          gst_rtsp_media_get_base_time    (GstRTSPMedia *media);
 
+GST_RTSP_SERVER_API
 guint                 gst_rtsp_media_n_streams        (GstRTSPMedia *media);
+
+GST_RTSP_SERVER_API
 GstRTSPStream *       gst_rtsp_media_get_stream       (GstRTSPMedia *media, guint idx);
+
+GST_RTSP_SERVER_API
 GstRTSPStream *       gst_rtsp_media_find_stream      (GstRTSPMedia *media, const gchar * control);
 
+GST_RTSP_SERVER_API
 gboolean              gst_rtsp_media_seek             (GstRTSPMedia *media, GstRTSPTimeRange *range);
+
+GST_RTSP_SERVER_API
+gboolean              gst_rtsp_media_seek_full        (GstRTSPMedia *media,
+                                                       GstRTSPTimeRange *range,
+                                                       GstSeekFlags flags);
+
+GST_RTSP_SERVER_API
+GstClockTimeDiff      gst_rtsp_media_seekable         (GstRTSPMedia *media);
+
+GST_RTSP_SERVER_API
 gchar *               gst_rtsp_media_get_range_string (GstRTSPMedia *media,
                                                        gboolean play,
                                                        GstRTSPRangeUnit unit);
 
+GST_RTSP_SERVER_API
 gboolean              gst_rtsp_media_set_state        (GstRTSPMedia *media, GstState state,
                                                        GPtrArray *transports);
+
+GST_RTSP_SERVER_API
 void                  gst_rtsp_media_set_pipeline_state (GstRTSPMedia * media,
                                                          GstState state);
+
+GST_RTSP_SERVER_API
+gboolean              gst_rtsp_media_complete_pipeline (GstRTSPMedia * media, GPtrArray * transports);
+
+#ifdef G_DEFINE_AUTOPTR_CLEANUP_FUNC
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(GstRTSPMedia, gst_object_unref)
+#endif
 
 G_END_DECLS
 

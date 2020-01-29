@@ -20,6 +20,8 @@
 #ifndef _GES_PITIVI_FORMATTER
 #define _GES_PITIVI_FORMATTER
 
+G_BEGIN_DECLS
+
 #define GES_TYPE_PITIVI_FORMATTER ges_pitivi_formatter_get_type()
 
 #define GES_PITIVI_FORMATTER(obj) \
@@ -65,7 +67,11 @@ struct _GESPitiviFormatterClass
   gpointer _ges_reserved[GES_PADDING];
 };
 
+GES_API
 GType ges_pitivi_formatter_get_type (void);
+GES_API
 GESPitiviFormatter *ges_pitivi_formatter_new (void);
+
+G_END_DECLS
 
 #endif /* _GES_PITIVI_FORMATTER */

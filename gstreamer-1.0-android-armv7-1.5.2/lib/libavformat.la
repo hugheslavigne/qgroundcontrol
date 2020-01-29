@@ -5,10 +5,10 @@
 # It is necessary for linking the library.
 
 # The name that we can dlopen(3).
-dlname=''
+dlname='libavformat.so'
 
 # Names of this library.
-library_names=''
+library_names='libavformat.so libavformat.so libavformat.so'
 
 # The name of the static archive.
 old_library='libavformat.a'
@@ -17,7 +17,7 @@ old_library='libavformat.a'
 inherited_linker_flags=''
 
 # Libraries that this one depends upon.
-dependency_libs=' /home/slomo/cerbero/dist/android_armv7/lib/libz.la  /home/slomo/cerbero/dist/android_armv7/lib/libbz2.la  /home/slomo/cerbero/dist/android_armv7/lib/libavutil.la  /home/slomo/cerbero/dist/android_armv7/lib/libavcodec.la '
+dependency_libs=' /home/cerbero/cerbero/build/dist/android_universal/armv7/lib/libavcodec.la  /home/cerbero/cerbero/build/dist/android_universal/armv7/lib/libswresample.la  /home/cerbero/cerbero/build/dist/android_universal/armv7/lib/libavutil.la  /home/cerbero/cerbero/build/dist/android_universal/armv7/lib/libbz2.la  /home/cerbero/cerbero/build/dist/android_universal/armv7/lib/libz.la '
 
 # Names of additional weak libraries provided by this library
 weak_library_names=''
@@ -38,4 +38,4 @@ dlopen=''
 dlpreopen=''
 
 # Directory that this library needs to be installed in:
-libdir='/home/slomo/cerbero/dist/android_armv7/lib'
+libdir='/home/cerbero/cerbero/build/dist/android_universal/armv7/lib'

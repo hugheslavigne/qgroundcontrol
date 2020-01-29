@@ -92,43 +92,77 @@ struct _GESTimelineClass {
   void (*track_removed)	(GESTimeline *timeline, GESTrack * track);
   void (*layer_added)	(GESTimeline *timeline, GESLayer *layer);
   void (*layer_removed)	(GESTimeline *timeline, GESLayer *layer);
+  void (*group_added) (GESTimeline *timeline, GESGroup *group);
+  void (*group_removed) (GESTimeline *timeline, GESGroup *group, GPtrArray *children);
 
   /* Padding for API extension */
   gpointer _ges_reserved[GES_PADDING];
 };
 
+GES_API
 GType ges_timeline_get_type (void);
 
+GES_API
 GESTimeline* ges_timeline_new (void);
+GES_API
 GESTimeline* ges_timeline_new_from_uri (const gchar *uri, GError **error);
 
+GES_API
 gboolean ges_timeline_load_from_uri (GESTimeline *timeline, const gchar *uri, GError **error);
+GES_API
 gboolean ges_timeline_save_to_uri (GESTimeline * timeline, const gchar * uri,
     GESAsset *formatter_asset, gboolean overwrite, GError ** error);
+GES_API
 gboolean ges_timeline_add_layer (GESTimeline *timeline, GESLayer *layer);
+GES_API
 GESLayer * ges_timeline_append_layer (GESTimeline * timeline);
+GES_API
 gboolean ges_timeline_remove_layer (GESTimeline *timeline, GESLayer *layer);
+GES_API
 GList* ges_timeline_get_layers (GESTimeline *timeline);
+GES_API
 GESLayer* ges_timeline_get_layer (GESTimeline *timeline, guint priority);
 
+GES_API
 gboolean ges_timeline_add_track (GESTimeline *timeline, GESTrack *track);
+GES_API
 gboolean ges_timeline_remove_track (GESTimeline *timeline, GESTrack *track);
 
+GES_API
 GESTrack * ges_timeline_get_track_for_pad (GESTimeline *timeline, GstPad *pad);
+GES_API
 GstPad * ges_timeline_get_pad_for_track (GESTimeline * timeline, GESTrack *track);
+GES_API
 GList *ges_timeline_get_tracks (GESTimeline *timeline);
 
+GES_API
+GList* ges_timeline_get_groups (GESTimeline * timeline);
+
+GES_API
 gboolean ges_timeline_commit (GESTimeline * timeline);
+GES_API
 gboolean ges_timeline_commit_sync (GESTimeline * timeline);
 
+GES_API
 GstClockTime ges_timeline_get_duration (GESTimeline *timeline);
 
+GES_API
 gboolean ges_timeline_get_auto_transition (GESTimeline * timeline);
+GES_API
 void ges_timeline_set_auto_transition (GESTimeline * timeline, gboolean auto_transition);
+GES_API
 GstClockTime ges_timeline_get_snapping_distance (GESTimeline * timeline);
+GES_API
 void ges_timeline_set_snapping_distance (GESTimeline * timeline, GstClockTime snapping_distance);
+GES_API
 GESTimelineElement * ges_timeline_get_element (GESTimeline * timeline, const gchar *name);
+GES_API
 gboolean ges_timeline_is_empty (GESTimeline * timeline);
+GES_API
+GESTimelineElement * ges_timeline_paste_element (GESTimeline * timeline,
+  GESTimelineElement * element, GstClockTime position, gint layer_priority);
+GES_API
+gboolean ges_timeline_move_layer (GESTimeline *timeline, GESLayer *layer, guint new_layer_priority);
 
 G_END_DECLS
 

@@ -89,18 +89,23 @@ struct _GESLayerClass {
   gpointer _ges_reserved[GES_PADDING];
 };
 
+GES_API
 GType ges_layer_get_type (void);
 
+GES_API
 GESLayer* ges_layer_new (void);
 
+GES_API
 void     ges_layer_set_timeline  (GESLayer * layer,
 					   GESTimeline * timeline);
 
-GESTimeline *
+GES_API GESTimeline *
 ges_layer_get_timeline           (GESLayer * layer);
 
+GES_API
 gboolean ges_layer_add_clip    (GESLayer * layer,
 					   GESClip * clip);
+GES_API
 GESClip * ges_layer_add_asset   (GESLayer *layer,
                                                        GESAsset *asset,
                                                        GstClockTime start,
@@ -108,25 +113,35 @@ GESClip * ges_layer_add_asset   (GESLayer *layer,
                                                        GstClockTime duration,
                                                        GESTrackType track_types);
 
+GES_API
 gboolean ges_layer_remove_clip (GESLayer * layer,
 					   GESClip * clip);
 
+GES_API
 void     ges_layer_set_priority  (GESLayer * layer,
 					   guint priority);
 
+GES_API
 gboolean ges_layer_is_empty      (GESLayer * layer);
 
+GES_API
+GList* ges_layer_get_clips_in_interval (GESLayer * layer, GstClockTime start, GstClockTime end);
+
+GES_API
 guint   ges_layer_get_priority  (GESLayer * layer);
 
+GES_API
 gboolean ges_layer_get_auto_transition (GESLayer * layer);
 
+GES_API
 void ges_layer_set_auto_transition (GESLayer * layer,
 					     gboolean auto_transition);
 
+GES_API
 GList*   ges_layer_get_clips   (GESLayer * layer);
+GES_API
 GstClockTime ges_layer_get_duration (GESLayer *layer);
 
 G_END_DECLS
 
 #endif /* _GES_LAYER */
-

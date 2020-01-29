@@ -24,6 +24,7 @@
 #define __GST_NET_TIME_PROVIDER_H__
 
 #include <gst/gst.h>
+#include <gst/net/net-prelude.h>
 
 G_BEGIN_DECLS
 
@@ -62,11 +63,17 @@ struct _GstNetTimeProviderClass {
   gpointer _gst_reserved[GST_PADDING];
 };
 
+GST_NET_API
 GType                   gst_net_time_provider_get_type  (void);
 
+GST_NET_API
 GstNetTimeProvider*     gst_net_time_provider_new       (GstClock *clock,
                                                          const gchar *address,
                                                          gint port);
+
+#ifdef G_DEFINE_AUTOPTR_CLEANUP_FUNC
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(GstNetTimeProvider, gst_object_unref)
+#endif
 
 G_END_DECLS
 

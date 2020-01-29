@@ -75,18 +75,13 @@ typedef
 #include <stdio.h>
 #endif
 
-#ifdef _WIN32
-#   include <windows.h>
-#   ifdef small
-      /* windows.h define small to char */
-#      undef small
-#   endif
+#if defined(_WIN32)
 #   ifdef BZ_EXPORT
-#   define BZ_API(func) WINAPI func
+#   define BZ_API(func) func
 #   define BZ_EXTERN extern
 #   else
    /* import windows dll dynamically */
-#   define BZ_API(func) (WINAPI * func)
+#   define BZ_API(func) ( * func)
 #   define BZ_EXTERN
 #   endif
 #else
@@ -116,7 +111,7 @@ BZ_EXTERN int BZ_API(BZ2_bzCompressEnd) (
 BZ_EXTERN int BZ_API(BZ2_bzDecompressInit) ( 
       bz_stream *strm, 
       int       verbosity, 
-      int       small
+      int       small_
    );
 
 BZ_EXTERN int BZ_API(BZ2_bzDecompress) ( 
@@ -140,7 +135,7 @@ BZ_EXTERN BZFILE* BZ_API(BZ2_bzReadOpen) (
       int*  bzerror,   
       FILE* f, 
       int   verbosity, 
-      int   small,
+      int   small_,
       void* unused,    
       int   nUnused 
    );
@@ -216,7 +211,7 @@ BZ_EXTERN int BZ_API(BZ2_bzBuffToBuffDecompress) (
       unsigned int* destLen,
       char*         source, 
       unsigned int  sourceLen,
-      int           small, 
+      int           small_,
       int           verbosity 
    );
 

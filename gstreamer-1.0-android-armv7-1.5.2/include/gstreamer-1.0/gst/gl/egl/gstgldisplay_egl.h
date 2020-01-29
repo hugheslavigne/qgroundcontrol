@@ -21,11 +21,11 @@
 #ifndef __GST_GL_DISPLAY_EGL_H__
 #define __GST_GL_DISPLAY_EGL_H__
 
-#include <gst/gst.h>
 #include <gst/gl/gstgldisplay.h>
 
 G_BEGIN_DECLS
 
+GST_GL_API
 GType gst_gl_display_egl_get_type (void);
 
 #define GST_TYPE_GL_DISPLAY_EGL             (gst_gl_display_egl_get_type())
@@ -49,18 +49,33 @@ struct _GstGLDisplayEGL
   GstGLDisplay          parent;
 
   /* <private> */
-  EGLDisplay display;
+  gpointer display;
 
   gboolean foreign_display;
+
+  gpointer _padding[GST_PADDING];
 };
 
 struct _GstGLDisplayEGLClass
 {
   GstGLDisplayClass object_class;
+
+  gpointer _padding[GST_PADDING];
 };
 
+GST_GL_API
 GstGLDisplayEGL *gst_gl_display_egl_new (void);
-GstGLDisplayEGL *gst_gl_display_egl_new_with_egl_display (EGLDisplay display);
+
+GST_GL_API
+GstGLDisplayEGL *gst_gl_display_egl_new_with_egl_display (gpointer display);
+
+GST_GL_API
+GstGLDisplayEGL *gst_gl_display_egl_from_gl_display (GstGLDisplay * display);
+
+GST_GL_API
+gpointer         gst_gl_display_egl_get_from_native (GstGLDisplayType type, guintptr display);
+
+#define GST_GL_DISPLAY_EGL_NAME "gst.gl.display.egl"
 
 G_END_DECLS
 

@@ -1,14 +1,13 @@
-prefix=/home/slomo/cerbero/dist/android_armv7
-exec_prefix=${prefix}
-libdir=/home/slomo/cerbero/dist/android_armv7/lib
+prefix=/home/cerbero/cerbero/build/dist/android_universal/armv7
+libdir=${prefix}/lib
 includedir=${prefix}/include
 
 gmodule_supported=true
 
 Name: GModule
 Description: Dynamic module loader for GLib
+Version: 2.56.1
 Requires: glib-2.0
-Version: 2.44.0
 Libs: -L${libdir} -lgmodule-2.0 -pthread
-Libs.private: 
-Cflags: -pthread
+Libs.private: -lintl
+Cflags: -I${includedir} -pthread

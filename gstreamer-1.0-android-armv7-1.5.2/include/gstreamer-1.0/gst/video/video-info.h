@@ -31,6 +31,16 @@ G_BEGIN_DECLS
 typedef struct _GstVideoInfo GstVideoInfo;
 
 /**
+ * GST_CAPS_FEATURE_FORMAT_INTERLACED:
+ *
+ * Name of the caps feature indicating that the stream is interlaced. Currently
+ * it is only used for video.
+ *
+ * Since: 1.16.
+ */
+#define GST_CAPS_FEATURE_FORMAT_INTERLACED "format:Interlaced"
+
+/**
  * GstVideoInterlaceMode:
  * @GST_VIDEO_INTERLACE_MODE_PROGRESSIVE: all frames are progressive
  * @GST_VIDEO_INTERLACE_MODE_INTERLEAVED: 2 fields are interleaved in one video
@@ -44,6 +54,11 @@ typedef struct _GstVideoInfo GstVideoInfo;
  *     Each field has only half the amount of lines as noted in the
  *     height property. This mode requires multiple GstVideoMeta metadata
  *     to describe the fields.
+ * @GST_VIDEO_INTERLACE_MODE_ALTERNATE: 1 field is stored in one buffer,
+ *     @GST_VIDEO_BUFFER_FLAG_TF or @GST_VIDEO_BUFFER_FLAG_BF indicates if
+ *     the buffer is carrying the top or bottom field, respectively. The top and
+ *     bottom buffers are expected to alternate in the pipeline, with this mode
+ *     (Since: 1.16).
  *
  * The possible values of the #GstVideoInterlaceMode describing the interlace
  * mode of the stream.
@@ -52,10 +67,14 @@ typedef enum {
   GST_VIDEO_INTERLACE_MODE_PROGRESSIVE = 0,
   GST_VIDEO_INTERLACE_MODE_INTERLEAVED,
   GST_VIDEO_INTERLACE_MODE_MIXED,
-  GST_VIDEO_INTERLACE_MODE_FIELDS
+  GST_VIDEO_INTERLACE_MODE_FIELDS,
+  GST_VIDEO_INTERLACE_MODE_ALTERNATE,
 } GstVideoInterlaceMode;
 
+GST_VIDEO_API
 const gchar *          gst_video_interlace_mode_to_string    (GstVideoInterlaceMode mode);
+
+GST_VIDEO_API
 GstVideoInterlaceMode  gst_video_interlace_mode_from_string  (const gchar * mode);
 
 /**
@@ -198,7 +217,7 @@ typedef enum {
  *
  * GstVideoMultiviewFlags are used to indicate extra properties of a
  * stereo/multiview stream beyond the frame layout and buffer mapping
- * that is conveyed in the #GstMultiviewMode.
+ * that is conveyed in the #GstVideoMultiviewMode.
  */
 typedef enum {
   GST_VIDEO_MULTIVIEW_FLAGS_NONE             = 0,
@@ -228,6 +247,32 @@ typedef enum {
 } GstVideoFlags;
 
 /**
+ * GstVideoFieldOrder:
+ * @GST_VIDEO_FIELD_ORDER_UNKNOWN: unknown field order for interlaced content.
+ *     The actual field order is signalled via buffer flags.
+ * @GST_VIDEO_FIELD_ORDER_TOP_FIELD_FIRST: top field is first
+ * @GST_VIDEO_FIELD_ORDER_BOTTOM_FIELD_FIRST: bottom field is first
+ *
+ * Field order of interlaced content. This is only valid for
+ * interlace-mode=interleaved and not interlace-mode=mixed. In the case of
+ * mixed or GST_VIDEO_FIELD_ORDER_UNKOWN, the field order is signalled via
+ * buffer flags.
+ *
+ * Since: 1.12
+ */
+typedef enum {
+  GST_VIDEO_FIELD_ORDER_UNKNOWN            = 0,
+  GST_VIDEO_FIELD_ORDER_TOP_FIELD_FIRST    = 1,
+  GST_VIDEO_FIELD_ORDER_BOTTOM_FIELD_FIRST = 2,
+} GstVideoFieldOrder;
+
+GST_VIDEO_API
+const gchar *      gst_video_field_order_to_string    (GstVideoFieldOrder order);
+
+GST_VIDEO_API
+GstVideoFieldOrder gst_video_field_order_from_string  (const gchar * order);
+
+/**
  * GstVideoInfo:
  * @finfo: the format info of the video
  * @interlace_mode: the interlace mode
@@ -244,8 +289,8 @@ typedef enum {
  * @fps_d: the framerate demnominator
  * @offset: offsets of the planes
  * @stride: strides of the planes
- * @multiview_mode: delivery mode for multiple views. (Since 1.6)
- * @multiview_flags: flags for multiple views configuration (Since 1.6)
+ * @multiview_mode: delivery mode for multiple views. (Since: 1.6)
+ * @multiview_flags: flags for multiple views configuration (Since: 1.6)
  *
  * Information describing image properties. This information can be filled
  * in from GstCaps with gst_video_info_from_caps(). The information is also used
@@ -281,11 +326,16 @@ struct _GstVideoInfo {
     struct {
       GstVideoMultiviewMode     multiview_mode;
       GstVideoMultiviewFlags    multiview_flags;
+      GstVideoFieldOrder        field_order;
     } abi;
     /*< private >*/
     gpointer _gst_reserved[GST_PADDING];
   } ABI;
 };
+
+#define GST_TYPE_VIDEO_INFO              (gst_video_info_get_type ())
+GST_VIDEO_API
+GType gst_video_info_get_type            (void);
 
 /* general info */
 #define GST_VIDEO_INFO_FORMAT(i)         (GST_VIDEO_FORMAT_INFO_FORMAT((i)->finfo))
@@ -297,14 +347,27 @@ struct _GstVideoInfo {
 
 #define GST_VIDEO_INFO_INTERLACE_MODE(i) ((i)->interlace_mode)
 #define GST_VIDEO_INFO_IS_INTERLACED(i)  ((i)->interlace_mode != GST_VIDEO_INTERLACE_MODE_PROGRESSIVE)
+#define GST_VIDEO_INFO_FIELD_ORDER(i)    ((i)->ABI.abi.field_order)
 #define GST_VIDEO_INFO_FLAGS(i)          ((i)->flags)
 #define GST_VIDEO_INFO_WIDTH(i)          ((i)->width)
 #define GST_VIDEO_INFO_HEIGHT(i)         ((i)->height)
+/**
+ * GST_VIDEO_INFO_FIELD_HEIGHT:
+ *
+ * The height of a field. It's the height of the full frame unless split-field
+ * (alternate) interlacing is in use.
+ *
+ * Since: 1.16.
+ */
+#define GST_VIDEO_INFO_FIELD_HEIGHT(i)   ((i)->interlace_mode == GST_VIDEO_INTERLACE_MODE_ALTERNATE? (i)->height / 2 : (i)->height)
 #define GST_VIDEO_INFO_SIZE(i)           ((i)->size)
 #define GST_VIDEO_INFO_VIEWS(i)          ((i)->views)
 #define GST_VIDEO_INFO_PAR_N(i)          ((i)->par_n)
 #define GST_VIDEO_INFO_PAR_D(i)          ((i)->par_d)
 #define GST_VIDEO_INFO_FPS_N(i)          ((i)->fps_n)
+#define GST_VIDEO_INFO_FIELD_RATE_N(i)   ((GST_VIDEO_INFO_INTERLACE_MODE ((i)) == \
+                                           GST_VIDEO_INTERLACE_MODE_ALTERNATE) ? \
+                                           (i)->fps_n * 2 : (i)->fps_n)
 #define GST_VIDEO_INFO_FPS_D(i)          ((i)->fps_d)
 
 #define GST_VIDEO_INFO_COLORIMETRY(i) ((i)->colorimetry)
@@ -330,32 +393,61 @@ struct _GstVideoInfo {
 #define GST_VIDEO_INFO_COMP_OFFSET(i,c)  GST_VIDEO_FORMAT_INFO_OFFSET((i)->finfo,(i)->offset,(c))
 #define GST_VIDEO_INFO_COMP_STRIDE(i,c)  GST_VIDEO_FORMAT_INFO_STRIDE((i)->finfo,(i)->stride,(c))
 #define GST_VIDEO_INFO_COMP_WIDTH(i,c)   GST_VIDEO_FORMAT_INFO_SCALE_WIDTH((i)->finfo,(c),(i)->width)
-#define GST_VIDEO_INFO_COMP_HEIGHT(i,c)  GST_VIDEO_FORMAT_INFO_SCALE_HEIGHT((i)->finfo,(c),(i)->height)
+#define GST_VIDEO_INFO_COMP_HEIGHT(i,c)  GST_VIDEO_FORMAT_INFO_SCALE_HEIGHT((i)->finfo,(c),GST_VIDEO_INFO_FIELD_HEIGHT(i))
 #define GST_VIDEO_INFO_COMP_PLANE(i,c)   GST_VIDEO_FORMAT_INFO_PLANE((i)->finfo,(c))
 #define GST_VIDEO_INFO_COMP_PSTRIDE(i,c) GST_VIDEO_FORMAT_INFO_PSTRIDE((i)->finfo,(c))
 #define GST_VIDEO_INFO_COMP_POFFSET(i,c) GST_VIDEO_FORMAT_INFO_POFFSET((i)->finfo,(c))
 
-void         gst_video_info_init        (GstVideoInfo *info);
+GST_VIDEO_API
+GstVideoInfo * gst_video_info_new         (void);
 
-void         gst_video_info_set_format  (GstVideoInfo *info, GstVideoFormat format,
-                                         guint width, guint height);
+GST_VIDEO_API
+void           gst_video_info_init        (GstVideoInfo *info);
 
-gboolean     gst_video_info_from_caps   (GstVideoInfo *info, const GstCaps  * caps);
+GST_VIDEO_API
+GstVideoInfo * gst_video_info_copy        (const GstVideoInfo *info);
 
-GstCaps *    gst_video_info_to_caps     (GstVideoInfo *info);
+GST_VIDEO_API
+void           gst_video_info_free        (GstVideoInfo *info);
 
-gboolean     gst_video_info_convert     (GstVideoInfo *info,
-                                         GstFormat     src_format,
-                                         gint64        src_value,
-                                         GstFormat     dest_format,
-                                         gint64       *dest_value);
-gboolean     gst_video_info_is_equal    (const GstVideoInfo *info,
-                     const GstVideoInfo *other);
+GST_VIDEO_API
+gboolean       gst_video_info_set_format  (GstVideoInfo *info, GstVideoFormat format,
+                                           guint width, guint height);
+
+GST_VIDEO_API
+gboolean       gst_video_info_set_interlaced_format
+                                          (GstVideoInfo         *info,
+                                           GstVideoFormat        format,
+                                           GstVideoInterlaceMode mode,
+                                           guint                 width,
+                                           guint                 height);
+
+GST_VIDEO_API
+gboolean       gst_video_info_from_caps   (GstVideoInfo *info, const GstCaps  * caps);
+
+GST_VIDEO_API
+GstCaps *      gst_video_info_to_caps     (GstVideoInfo *info);
+
+GST_VIDEO_API
+gboolean       gst_video_info_convert     (GstVideoInfo *info,
+                                           GstFormat     src_format,
+                                           gint64        src_value,
+                                           GstFormat     dest_format,
+                                           gint64       *dest_value);
+
+GST_VIDEO_API
+gboolean       gst_video_info_is_equal    (const GstVideoInfo *info,
+                                           const GstVideoInfo *other);
 
 #include <gst/video/video.h>
 
-void         gst_video_info_align       (GstVideoInfo * info, GstVideoAlignment * align);
+GST_VIDEO_API
+gboolean       gst_video_info_align       (GstVideoInfo * info, GstVideoAlignment * align);
 
+
+#ifdef G_DEFINE_AUTOPTR_CLEANUP_FUNC
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(GstVideoInfo, gst_video_info_free)
+#endif
 
 G_END_DECLS
 

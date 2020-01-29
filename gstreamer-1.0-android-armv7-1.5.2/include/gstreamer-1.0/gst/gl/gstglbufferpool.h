@@ -21,19 +21,15 @@
 #ifndef _GST_GL_BUFFER_POOL_H_
 #define _GST_GL_BUFFER_POOL_H_
 
-#include <gst/video/video.h>
 #include <gst/video/gstvideometa.h>
 #include <gst/video/gstvideopool.h>
 
-#include <gst/gl/gstgl_fwd.h>
+#include <gst/gl/gstglbasememory.h>
 
 G_BEGIN_DECLS
 
-typedef struct _GstGLBufferPool GstGLBufferPool;
-typedef struct _GstGLBufferPoolClass GstGLBufferPoolClass;
-typedef struct _GstGLBufferPoolPrivate GstGLBufferPoolPrivate;
-
 /* buffer pool functions */
+GST_GL_API
 GType gst_gl_buffer_pool_get_type (void);
 #define GST_TYPE_GL_BUFFER_POOL      (gst_gl_buffer_pool_get_type())
 #define GST_IS_GL_BUFFER_POOL(obj)   (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GST_TYPE_GL_BUFFER_POOL))
@@ -50,9 +46,11 @@ struct _GstGLBufferPool
   GstBufferPool bufferpool;
 
   GstGLContext *context;
-  GstGLUploadMeta *upload;
 
+  /* <private> */
   GstGLBufferPoolPrivate *priv;
+
+  gpointer _padding[GST_PADDING];
 };
 
 /**
@@ -63,11 +61,19 @@ struct _GstGLBufferPool
 struct _GstGLBufferPoolClass
 {
   GstBufferPoolClass parent_class;
+
+  /* <private> */
+  gpointer _padding[GST_PADDING];
 };
 
+GST_GL_API
 GstBufferPool *gst_gl_buffer_pool_new (GstGLContext * context);
-void gst_gl_buffer_pool_replace_last_buffer (GstGLBufferPool * pool,
-    GstBuffer * buffer);
+
+GST_GL_API
+GstGLAllocationParams * gst_buffer_pool_config_get_gl_allocation_params    (GstStructure * config);
+GST_GL_API
+void                    gst_buffer_pool_config_set_gl_allocation_params    (GstStructure * config,
+                                                                            GstGLAllocationParams * params);
 
 G_END_DECLS
 

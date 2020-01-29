@@ -22,10 +22,13 @@
 #ifndef __GST_RTSP_PERMISSIONS_H__
 #define __GST_RTSP_PERMISSIONS_H__
 
+#include "rtsp-server-prelude.h"
+
 typedef struct _GstRTSPPermissions GstRTSPPermissions;
 
 G_BEGIN_DECLS
 
+GST_RTSP_SERVER_API
 GType gst_rtsp_permissions_get_type (void);
 
 #define GST_TYPE_RTSP_PERMISSIONS        (gst_rtsp_permissions_get_type ())
@@ -52,10 +55,6 @@ struct _GstRTSPPermissions {
  *
  * Returns: (transfer full): @permissions (for convenience when doing assignments)
  */
-#ifdef _FOOL_GTK_DOC_
-G_INLINE_FUNC GstRTSPPermissions * gst_rtsp_permissions_ref (GstRTSPPermissions * permissions);
-#endif
-
 static inline GstRTSPPermissions *
 gst_rtsp_permissions_ref (GstRTSPPermissions * permissions)
 {
@@ -68,10 +67,6 @@ gst_rtsp_permissions_ref (GstRTSPPermissions * permissions)
  *
  * Decrease the refcount of an permissions, freeing it if the refcount reaches 0.
  */
-#ifdef _FOOL_GTK_DOC_
-G_INLINE_FUNC void gst_rtsp_permissions_unref (GstRTSPPermissions * permissions);
-#endif
-
 static inline void
 gst_rtsp_permissions_unref (GstRTSPPermissions * permissions)
 {
@@ -79,22 +74,48 @@ gst_rtsp_permissions_unref (GstRTSPPermissions * permissions)
 }
 
 
+GST_RTSP_SERVER_API
 GstRTSPPermissions *  gst_rtsp_permissions_new             (void);
 
+GST_RTSP_SERVER_API
 void                  gst_rtsp_permissions_add_role        (GstRTSPPermissions *permissions,
                                                             const gchar *role,
                                                             const gchar *fieldname, ...);
+
+GST_RTSP_SERVER_API
 void                  gst_rtsp_permissions_add_role_valist (GstRTSPPermissions *permissions,
                                                             const gchar *role,
                                                             const gchar *fieldname,
                                                             va_list var_args);
+
+GST_RTSP_SERVER_API
+void                  gst_rtsp_permissions_add_role_empty  (GstRTSPPermissions * permissions,
+                                                            const gchar * role);
+
+GST_RTSP_SERVER_API
+void                  gst_rtsp_permissions_add_role_from_structure (GstRTSPPermissions * permissions,
+                                                            GstStructure *structure);
+GST_RTSP_SERVER_API
+void                  gst_rtsp_permissions_add_permission_for_role (GstRTSPPermissions * permissions,
+                                                            const gchar * role,
+                                                            const gchar * permission,
+                                                            gboolean      allowed);
+
+GST_RTSP_SERVER_API
 void                  gst_rtsp_permissions_remove_role     (GstRTSPPermissions *permissions,
                                                             const gchar *role);
+
+GST_RTSP_SERVER_API
 const GstStructure *  gst_rtsp_permissions_get_role        (GstRTSPPermissions *permissions,
                                                             const gchar *role);
 
+GST_RTSP_SERVER_API
 gboolean              gst_rtsp_permissions_is_allowed      (GstRTSPPermissions *permissions,
                                                             const gchar *role, const gchar *permission);
+
+#ifdef G_DEFINE_AUTOPTR_CLEANUP_FUNC
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(GstRTSPPermissions, gst_rtsp_permissions_unref)
+#endif
 
 G_END_DECLS
 

@@ -24,6 +24,8 @@
 #include <glib-object.h>
 #include <ges/ges-timeline.h>
 
+G_BEGIN_DECLS
+
 #define GES_TYPE_FORMATTER ges_formatter_get_type()
 
 #define GES_FORMATTER(obj) \
@@ -78,6 +80,8 @@ typedef gboolean (*GESFormatterCanLoadURIMethod) (GESFormatter *dummy_instance, 
  *
  * Returns: TRUE if the @timeline was properly loaded from the given @uri,
  * else FALSE.
+ *
+ * Deprecated: 1.16: Use @ges_timeline_load_from_uri
  **/
 typedef gboolean (*GESFormatterLoadFromURIMethod) (GESFormatter *formatter,
                   GESTimeline *timeline,
@@ -98,6 +102,8 @@ typedef gboolean (*GESFormatterLoadFromURIMethod) (GESFormatter *formatter,
  *
  * Returns: TRUE if the @timeline was properly stored to the given @uri,
  * else FALSE.
+ *
+ * Deprecated: 1.16: Use @ges_timeline_save_to_uri
  */
 typedef gboolean (*GESFormatterSaveToURIMethod) (GESFormatter *formatter,
                GESTimeline *timeline, const gchar * uri, gboolean overwrite,
@@ -136,8 +142,10 @@ struct _GESFormatterClass {
   gpointer _ges_reserved[GES_PADDING];
 };
 
+GES_API
 GType ges_formatter_get_type (void);
 
+GES_API
 void ges_formatter_class_register_metas (GESFormatterClass * klass,
                                          const gchar *name,
                                          const gchar *description,
@@ -146,20 +154,27 @@ void ges_formatter_class_register_metas (GESFormatterClass * klass,
                                          gdouble version,
                                          GstRank rank);
 
+GES_API
 gboolean ges_formatter_can_load_uri     (const gchar * uri, GError **error);
+GES_API
 gboolean ges_formatter_can_save_uri     (const gchar * uri, GError **error);
 
+GES_API
 gboolean ges_formatter_load_from_uri    (GESFormatter * formatter,
                                          GESTimeline  *timeline,
                                          const gchar *uri,
                                          GError **error);
 
+GES_API
 gboolean ges_formatter_save_to_uri      (GESFormatter * formatter,
                                          GESTimeline *timeline,
                                          const gchar *uri,
                                          gboolean overwrite,
                                          GError **error);
 
+GES_API
 GESAsset *ges_formatter_get_default    (void);
+
+G_END_DECLS
 
 #endif /* _GES_FORMATTER */

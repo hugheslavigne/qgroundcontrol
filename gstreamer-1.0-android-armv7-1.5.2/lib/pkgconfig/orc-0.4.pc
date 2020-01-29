@@ -1,13 +1,13 @@
-prefix=/home/slomo/cerbero/dist/android_armv7
-exec_prefix=${prefix}
-libdir=/home/slomo/cerbero/dist/android_armv7/lib
-includedir=${prefix}/include/orc-0.4
+prefix=/home/cerbero/cerbero/build/dist/android_universal/armv7
+exec_prefix=/home/cerbero/cerbero/build/dist/android_universal/armv7
+libdir=/home/cerbero/cerbero/build/dist/android_universal/armv7/lib
+includedir=/home/cerbero/cerbero/build/dist/android_universal/armv7/include/orc-0.4
 toolsdir=${exec_prefix}/bin
 
 
 Name: orc-0.4
 Description: Library of Optimized Inner Loops Runtime Compiler
-Version: 0.4.24.1
+Version: 0.4.29
 Libs: -L${libdir} -lorc-0.4
 Libs.private: -lm  
 Cflags: -I${includedir}

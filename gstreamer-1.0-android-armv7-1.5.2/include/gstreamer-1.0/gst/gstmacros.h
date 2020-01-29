@@ -19,6 +19,8 @@
 #ifndef __GST_MACROS_H__
 #define __GST_MACROS_H__
 
+#include <glib.h>
+
 G_BEGIN_DECLS
 
 #if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 4)
@@ -39,9 +41,12 @@ G_BEGIN_DECLS
 # undef GST_CAN_INLINE
 #endif
 
+/* MSVC defines 'restrict' as a keyword and not a define */
 #if (!defined(__STDC_VERSION__) || __STDC_VERSION__ < 199901L) && !defined(restrict)
 #  if defined(__GNUC__) && __GNUC__ >= 4
 #    define restrict __restrict__
+#  elif defined(_MSC_VER)
+#    define restrict __restrict
 #  else
 #    define restrict
 #  endif

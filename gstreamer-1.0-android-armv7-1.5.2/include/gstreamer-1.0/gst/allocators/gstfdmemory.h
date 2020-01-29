@@ -22,6 +22,7 @@
 #define __GST_FD_ALLOCATOR_H__
 
 #include <gst/gst.h>
+#include <gst/allocators/allocators-prelude.h>
 
 G_BEGIN_DECLS
 
@@ -45,6 +46,8 @@ typedef struct _GstFdAllocatorClass GstFdAllocatorClass;
  *        keep it mapped until the memory is destroyed.
  * @GST_FD_MEMORY_FLAG_MAP_PRIVATE: do a private mapping instead of
  *        the default shared mapping.
+ * @GST_FD_MEMORY_FLAG_DONT_CLOSE: don't close the file descriptor when
+ *        the memory is freed. Since: 1.10
  *
  * Various flags to control the operation of the fd backed memory.
  *
@@ -54,6 +57,7 @@ typedef enum {
   GST_FD_MEMORY_FLAG_NONE = 0,
   GST_FD_MEMORY_FLAG_KEEP_MAPPED = (1 << 0),
   GST_FD_MEMORY_FLAG_MAP_PRIVATE = (1 << 1),
+  GST_FD_MEMORY_FLAG_DONT_CLOSE  = (1 << 2),
 } GstFdMemoryFlags;
 
 /**
@@ -73,14 +77,25 @@ struct _GstFdAllocatorClass
   GstAllocatorClass parent_class;
 };
 
-GType gst_fd_allocator_get_type (void);
+GST_ALLOCATORS_API
+GType           gst_fd_allocator_get_type (void);
 
+GST_ALLOCATORS_API
 GstAllocator *  gst_fd_allocator_new    (void);
+
+GST_ALLOCATORS_API
 GstMemory *     gst_fd_allocator_alloc  (GstAllocator * allocator, gint fd,
                                          gsize size, GstFdMemoryFlags flags);
 
+GST_ALLOCATORS_API
 gboolean        gst_is_fd_memory        (GstMemory *mem);
+
+GST_ALLOCATORS_API
 gint            gst_fd_memory_get_fd    (GstMemory *mem);
+
+#ifdef G_DEFINE_AUTOPTR_CLEANUP_FUNC
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(GstFdAllocator, gst_object_unref)
+#endif
 
 G_END_DECLS
 

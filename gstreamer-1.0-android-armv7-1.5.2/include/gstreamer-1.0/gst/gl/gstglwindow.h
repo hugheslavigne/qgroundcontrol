@@ -30,19 +30,36 @@
 
 G_BEGIN_DECLS
 
-#define GST_GL_TYPE_WINDOW         (gst_gl_window_get_type())
-#define GST_GL_WINDOW(o)           (G_TYPE_CHECK_INSTANCE_CAST((o), GST_GL_TYPE_WINDOW, GstGLWindow))
-#define GST_GL_WINDOW_CLASS(k)     (G_TYPE_CHECK_CLASS_CAST((k), GST_GL_TYPE_WINDOW, GstGLWindowClass))
-#define GST_GL_IS_WINDOW(o)        (G_TYPE_CHECK_INSTANCE_TYPE((o), GST_GL_TYPE_WINDOW))
-#define GST_GL_IS_WINDOW_CLASS(k)  (G_TYPE_CHECK_CLASS_TYPE((k), GST_GL_TYPE_WINDOW))
-#define GST_GL_WINDOW_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS((o), GST_GL_TYPE_WINDOW, GstGLWindowClass))
+GST_GL_API
+GType gst_gl_window_get_type       (void);
+#define GST_TYPE_GL_WINDOW         (gst_gl_window_get_type())
+
+#define GST_GL_WINDOW(o)           (G_TYPE_CHECK_INSTANCE_CAST((o), GST_TYPE_GL_WINDOW, GstGLWindow))
+#define GST_GL_WINDOW_CLASS(k)     (G_TYPE_CHECK_CLASS_CAST((k), GST_TYPE_GL_WINDOW, GstGLWindowClass))
+#define GST_IS_GL_WINDOW(o)        (G_TYPE_CHECK_INSTANCE_TYPE((o), GST_TYPE_GL_WINDOW))
+#define GST_IS_GL_WINDOW_CLASS(k)  (G_TYPE_CHECK_CLASS_TYPE((k), GST_TYPE_GL_WINDOW))
+#define GST_GL_WINDOW_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS((o), GST_TYPE_GL_WINDOW, GstGLWindowClass))
 
 #define GST_GL_WINDOW_LOCK(w) g_mutex_lock(&GST_GL_WINDOW(w)->lock)
 #define GST_GL_WINDOW_UNLOCK(w) g_mutex_unlock(&GST_GL_WINDOW(w)->lock)
 #define GST_GL_WINDOW_GET_LOCK(w) (&GST_GL_WINDOW(w)->lock)
 
+GST_GL_API
+GQuark gst_gl_window_error_quark (void);
+/**
+ * GST_GL_WINDOW_ERROR:
+ *
+ * Error domain for GStreamer's GL window module. Errors in this domain will be
+ * from the #GstGLWindowError enumeration
+ */
 #define GST_GL_WINDOW_ERROR (gst_gl_window_error_quark ())
 
+/**
+ * GstGLWindowError:
+ * @GST_GL_WINDOW_ERROR_FAILED: failed for a unspecified reason
+ * @GST_GL_WINDOW_ERROR_OLD_LIBS: the implementation is too old
+ * @GST_GL_WINDOW_ERROR_RESOURCE_UNAVAILABLE: no such resource was found
+ */
 typedef enum
 {
   GST_GL_WINDOW_ERROR_FAILED,
@@ -53,7 +70,20 @@ typedef enum
 typedef void (*GstGLWindowCB) (gpointer data);
 typedef void (*GstGLWindowResizeCB) (gpointer data, guint width, guint height);
 
+/**
+ * GST_GL_WINDOW_CB:
+ * @f: the function to cast
+ *
+ * Cast to the currect function type for generic window callbacks
+ */
 #define	GST_GL_WINDOW_CB(f)			 ((GstGLWindowCB) (f))
+
+/**
+ * GST_GL_WINDOW_RESIZE_CB:
+ * @f: the function to cast
+ *
+ * Cast to the currect function type for window resize callbacks
+ */
 #define	GST_GL_WINDOW_RESIZE_CB(f)		 ((GstGLWindowResizeCB) (f))
 
 /**
@@ -67,17 +97,11 @@ struct _GstGLWindow {
   GstObject parent;
 
   GMutex        lock;
-  GMutex        nav_lock;
-  GCond         nav_create_cond;
-  GCond         nav_destroy_cond;
-  gboolean      nav_created;
-  gboolean      nav_alive;
 
   GstGLDisplay *display;
   GWeakRef      context_ref;
 
-  guintptr      external_gl_context;
-
+  /*< protected >*/
   gboolean      is_drawing;
 
   GstGLWindowCB         draw;
@@ -90,10 +114,11 @@ struct _GstGLWindow {
   gpointer              resize_data;
   GDestroyNotify        resize_notify;
 
-  /*< private >*/
-  GMainContext *navigation_context;
-  GMainLoop *navigation_loop;
+  gboolean              queue_resize;
 
+  GMainContext         *main_context; /* default main_context */
+
+  /*< private >*/
   GstGLWindowPrivate *priv;
 
   gpointer _reserved[GST_PADDING];
@@ -103,10 +128,10 @@ struct _GstGLWindow {
  * GstGLWindowClass:
  * @parent_class: Parent class
  * @get_display: Gets the current windowing system display connection
- * @set_window_handle: Set a window to render into
- * @get_window_handle: Gets the current window that this #GstGLWindow is
- *                     rendering into
- * @draw_unlocked: redraw the window with the specified dimensions
+ * @set_window_handle: Set a window handle to render into
+ * @get_window_handle: Gets the current window handle that this #GstGLWindow is
+ *                     rendering into.  This may return a different value to
+ *                     what is passed into @set_window_handle
  * @draw: redraw the window with the specified dimensions
  * @run: run the mainloop
  * @quit: send a quit to the mainloop
@@ -115,21 +140,23 @@ struct _GstGLWindow {
  *                      not have been called.  Required to be reentrant.
  * @open: open the connection to the display
  * @close: close the connection to the display
- * @get_surface_dimensions: get the width and height of the surface we are
- *                          rendering into.
  * @handle_events: whether to handle 'extra' events from the windowing system.
  *                 Basic events like surface moves and resizes are still valid
  *                 things to listen for.
  * @set_preferred_size: request that the window change surface size.  The
  *                      implementation is free to ignore this information.
+ * @show: request that the window be shown to the user
+ * @set_render_rectangle: request a rectangle to render into.  See #GstVideoOverlay
+ * @queue_resize: request a resize to occur when possible
+ * @controls_viewport: Whether the window takes care of glViewport setup.
+ *                     and the user does not need to deal with viewports
  */
 struct _GstGLWindowClass {
   GstObjectClass parent_class;
 
   guintptr (*get_display)        (GstGLWindow *window);
-  void     (*set_window_handle)  (GstGLWindow *window, guintptr id);
+  void     (*set_window_handle)  (GstGLWindow *window, guintptr handle);
   guintptr (*get_window_handle)  (GstGLWindow *window);
-  void     (*draw_unlocked)      (GstGLWindow *window);
   void     (*draw)               (GstGLWindow *window);
   void     (*run)                (GstGLWindow *window);
   void     (*quit)               (GstGLWindow *window);
@@ -138,74 +165,67 @@ struct _GstGLWindowClass {
 
   gboolean (*open)               (GstGLWindow *window, GError **error);
   void     (*close)              (GstGLWindow *window);
-  void     (*get_surface_dimensions)  (GstGLWindow *window, guint *width, guint *height);
   void     (*handle_events)      (GstGLWindow *window, gboolean handle_events);
   void     (*set_preferred_size) (GstGLWindow *window, gint width, gint height);
   void     (*show)               (GstGLWindow *window);
   gboolean (*set_render_rectangle)(GstGLWindow *window, gint x, gint y, gint width, gint height);
+  void     (*queue_resize)       (GstGLWindow *window);
+  gboolean (*controls_viewport)  (GstGLWindow *window);
 
   /*< private >*/
-  gpointer _reserved[GST_PADDING];
+  gpointer _reserved[GST_PADDING-1];
 };
 
-struct key_event
-{
-  GstGLWindow *window;
-  const char *event_type;
-  const char *key_str;
-};
-
-struct mouse_event
-{
-  GstGLWindow *window;
-  const char *event_type;
-  int button;
-  double posx;
-  double posy;
-};
-
-GQuark gst_gl_window_error_quark (void);
-GType gst_gl_window_get_type     (void);
-
+GST_GL_API
 GstGLWindow * gst_gl_window_new  (GstGLDisplay *display);
 
 /* callbacks */
+GST_GL_API
 void     gst_gl_window_set_draw_callback    (GstGLWindow *window,
                                              GstGLWindowCB callback,
                                              gpointer data,
                                              GDestroyNotify destroy_notify);
+GST_GL_API
 void     gst_gl_window_set_resize_callback  (GstGLWindow *window,
                                              GstGLWindowResizeCB callback,
                                              gpointer data,
                                              GDestroyNotify destroy_notify);
+GST_GL_API
 void     gst_gl_window_set_close_callback   (GstGLWindow *window,
                                              GstGLWindowCB callback,
                                              gpointer data,
                                              GDestroyNotify destroy_notify);
 
+GST_GL_API
 void     gst_gl_window_set_window_handle    (GstGLWindow *window, guintptr handle);
+GST_GL_API
 guintptr gst_gl_window_get_window_handle    (GstGLWindow *window);
 
 /* loop/events */
+GST_GL_API
 void     gst_gl_window_run                  (GstGLWindow *window);
+GST_GL_API
 void     gst_gl_window_quit                 (GstGLWindow *window);
-gboolean gst_gl_window_is_running           (GstGLWindow *window);
+GST_GL_API
 void     gst_gl_window_send_message         (GstGLWindow *window,
                                              GstGLWindowCB callback,
                                              gpointer data);
+GST_GL_API
 void     gst_gl_window_send_message_async   (GstGLWindow *window,
                                              GstGLWindowCB callback,
                                              gpointer data,
                                              GDestroyNotify destroy);
 
 /* navigation */
+GST_GL_API
 void     gst_gl_window_handle_events        (GstGLWindow * window,
                                              gboolean handle_events);
-gboolean gst_gl_window_key_event_cb         (gpointer data);
-gboolean gst_gl_window_mouse_event_cb       (gpointer data);
+
+GST_GL_API
 void     gst_gl_window_send_key_event       (GstGLWindow * window,
                                              const char * event_type,
                                              const char * key_str);
+GST_GL_API
 void     gst_gl_window_send_mouse_event     (GstGLWindow * window,
                                              const char * event_type,
                                              int button,
@@ -213,25 +233,37 @@ void     gst_gl_window_send_mouse_event     (GstGLWindow * window,
                                              double posy);
 
 /* surfaces/rendering */
-void     gst_gl_window_draw_unlocked        (GstGLWindow *window);
+GST_GL_API
+void     gst_gl_window_queue_resize         (GstGLWindow *window);
+GST_GL_API
 void     gst_gl_window_draw                 (GstGLWindow *window);
+GST_GL_API
 void     gst_gl_window_show                 (GstGLWindow *window);
+GST_GL_API
 void     gst_gl_window_set_preferred_size   (GstGLWindow * window,
                                              gint width,
                                              gint height);
+GST_GL_API
 void     gst_gl_window_get_surface_dimensions (GstGLWindow * window,
                                                guint * width,
                                                guint * height);
+GST_GL_API
 gboolean gst_gl_window_set_render_rectangle   (GstGLWindow * window,
                                                gint x,
                                                gint y,
                                                gint width,
                                                gint height);
+GST_GL_API
+gboolean gst_gl_window_controls_viewport      (GstGLWindow * window);
 
+/* subclass usage only */
+GST_GL_API
+void     gst_gl_window_resize               (GstGLWindow *window, guint width, guint height);
+
+GST_GL_API
 GstGLContext * gst_gl_window_get_context    (GstGLWindow *window);
+GST_GL_API
 guintptr       gst_gl_window_get_display    (GstGLWindow *window);
-
-GST_DEBUG_CATEGORY_EXTERN (gst_gl_window_debug);
 
 G_END_DECLS
 

@@ -8,7 +8,7 @@
 dlname='libbz2.so.1'
 
 # Names of this library.
-library_names='libbz2.so.1.6 libbz2.so.1 libbz2.so'
+library_names='libbz2.so.1.0.6 libbz2.so.1 libbz2.so'
 
 # The name of the static archive.
 old_library='libbz2.a'
@@ -38,4 +38,4 @@ dlopen=''
 dlpreopen=''
 
 # Directory that this library needs to be installed in:
-libdir='/home/slomo/cerbero/dist/android_armv7/lib'
+libdir='/home/cerbero/cerbero/build/dist/android_universal/armv7/lib'

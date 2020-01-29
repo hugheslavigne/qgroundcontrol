@@ -70,7 +70,6 @@ typedef enum
  * controlled by this Container. NOTE: Do not modify.
  * @height: The span of priorities this container occupies
  *
- *
  * The #GESContainer base class.
  */
 struct _GESContainer
@@ -135,29 +134,27 @@ struct _GESContainerClass
   gpointer _ges_reserved[GES_PADDING_LARGE];
 };
 
+GES_API
 GType ges_container_get_type (void);
 
 /* Children handling */
+GES_API
 GList* ges_container_get_children (GESContainer *container, gboolean recursive);
+GES_API
 gboolean ges_container_add        (GESContainer *container, GESTimelineElement *child);
+GES_API
 gboolean ges_container_remove     (GESContainer *container, GESTimelineElement *child);
+GES_API
 GList * ges_container_ungroup     (GESContainer * container, gboolean recursive);
+GES_API
 GESContainer *ges_container_group (GList *containers);
 
-/* To be used by subclasses only */
-void _ges_container_set_height                (GESContainer * container,
-                                               guint32 height);
-gboolean ges_container_edit                   (GESContainer * container,
-                                               GList * layers, gint new_layer_priority,
-                                               GESEditMode mode,
-                                               GESEdge edge,
-                                               guint64 position);
-gint  _ges_container_get_priority_offset      (GESContainer * container,
-                                               GESTimelineElement *elem);
-void _ges_container_set_priority_offset       (GESContainer * container,
-                                               GESTimelineElement *elem,
-                                               gint32 priority_offset);
-
+GES_API
+gboolean ges_container_edit       (GESContainer * container,
+                                   GList * layers, gint new_layer_priority,
+                                   GESEditMode mode,
+                                   GESEdge edge,
+                                   guint64 position);
 
 G_END_DECLS
 #endif /* _GES_CONTAINER */

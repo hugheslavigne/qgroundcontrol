@@ -76,6 +76,7 @@ struct _GESOperationClass {
   gpointer _ges_reserved[GES_PADDING];
 };
 
+GES_API
 GType ges_operation_get_type (void);
 
 G_END_DECLS

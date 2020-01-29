@@ -46,6 +46,7 @@
 #include <gst/gstdevice.h>
 #include <gst/gstdevicemonitor.h>
 #include <gst/gstdeviceprovider.h>
+#include <gst/gstdynamictypefactory.h>
 #include <gst/gstelement.h>
 #include <gst/gstelementmetadata.h>
 #include <gst/gsterror.h>
@@ -58,6 +59,7 @@
 #include <gst/gstmeta.h>
 #include <gst/gstminiobject.h>
 #include <gst/gstobject.h>
+#include <gst/gststreamcollection.h>
 #include <gst/gstpad.h>
 #include <gst/gstparamspecs.h>
 #include <gst/gstpipeline.h>
@@ -67,8 +69,10 @@
 #include <gst/gstprotection.h>
 #include <gst/gstquery.h>
 #include <gst/gstregistry.h>
+#include <gst/gstpromise.h>
 #include <gst/gstsample.h>
 #include <gst/gstsegment.h>
+#include <gst/gststreams.h>
 #include <gst/gststructure.h>
 #include <gst/gstsystemclock.h>
 #include <gst/gsttaglist.h>
@@ -77,6 +81,9 @@
 #include <gst/gsttaskpool.h>
 #include <gst/gsttoc.h>
 #include <gst/gsttocsetter.h>
+#include <gst/gsttracer.h>
+#include <gst/gsttracerfactory.h>
+#include <gst/gsttracerrecord.h>
 #include <gst/gsttypefind.h>
 #include <gst/gsttypefindfactory.h>
 #include <gst/gsturi.h>
@@ -90,24 +97,44 @@
 
 G_BEGIN_DECLS
 
+GST_API
 void		gst_init			(int *argc, char **argv[]);
+
+GST_API
 gboolean	gst_init_check			(int *argc, char **argv[],
 						 GError ** err);
+GST_API
 gboolean        gst_is_initialized              (void);
+
+GST_API
 GOptionGroup *	gst_init_get_option_group	(void);
+
+GST_API
 void		gst_deinit			(void);
 
+GST_API
 void		gst_version			(guint *major, guint *minor,
 						 guint *micro, guint *nano);
+GST_API
 gchar *		gst_version_string		(void);
 
+GST_API
 gboolean        gst_segtrap_is_enabled          (void);
+
+GST_API
 void            gst_segtrap_set_enabled         (gboolean enabled);
 
+GST_API
 gboolean        gst_registry_fork_is_enabled    (void);
+
+GST_API
 void            gst_registry_fork_set_enabled   (gboolean enabled);
 
+GST_API
 gboolean        gst_update_registry             (void);
+
+GST_API
+const gchar *   gst_get_main_executable_path    (void);
 
 G_END_DECLS
 

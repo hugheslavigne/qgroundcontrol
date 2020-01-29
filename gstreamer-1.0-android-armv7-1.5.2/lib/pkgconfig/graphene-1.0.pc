@@ -1,15 +1,17 @@
-prefix=/home/slomo/cerbero/dist/android_armv7
-exec_prefix=${prefix}
-libdir=/home/slomo/cerbero/dist/android_armv7/lib
+prefix=/home/cerbero/cerbero/build/dist/android_universal/armv7
+libdir=${prefix}/lib
 includedir=${prefix}/include
-sse2_cflags=-msse -msse2 -mfpmath=sse -Winline
-neon_cflags=-mfpu=neon -mfloat-abi=softfp
-graphene_simd=scalar
+
+graphene_has_sse2=0
+graphene_has_gcc=0
+graphene_has_neon=0
+graphene_has_scalar=1
 
 Name: Graphene
 Description: Math classes for graphic libraries
-Version: 1.2.2
+URL: https://ebassi.github.io/graphene
+Version: 1.8.2
+Requires.private: gobject-2.0 >=  2.30.0
 Libs: -L${libdir} -lgraphene-1.0
-Libs.private: 
+Libs.private: -lm -pthread
 Cflags: -I${includedir}/graphene-1.0 -I${libdir}/graphene-1.0/include
-Requires.private:  gobject-2.0

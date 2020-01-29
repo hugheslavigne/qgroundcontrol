@@ -29,6 +29,7 @@ typedef struct _GstRTSPClient GstRTSPClient;
 typedef struct _GstRTSPClientClass GstRTSPClientClass;
 typedef struct _GstRTSPClientPrivate GstRTSPClientPrivate;
 
+#include "rtsp-server-prelude.h"
 #include "rtsp-context.h"
 #include "rtsp-mount-points.h"
 #include "rtsp-sdp.h"
@@ -61,6 +62,27 @@ typedef gboolean (*GstRTSPClientSendFunc)      (GstRTSPClient *client,
                                                 gpointer user_data);
 
 /**
+ * GstRTSPClientSendMessagesFunc:
+ * @client: a #GstRTSPClient
+ * @messages: #GstRTSPMessage
+ * @n_messages: number of messages
+ * @close: close the connection
+ * @user_data: user data when registering the callback
+ *
+ * This callback is called when @client wants to send @messages. When @close is
+ * %TRUE, the connection should be closed when the message has been sent.
+ *
+ * Returns: %TRUE on success.
+ *
+ * Since: 1.16
+ */
+typedef gboolean (*GstRTSPClientSendMessagesFunc)      (GstRTSPClient *client,
+                                                        GstRTSPMessage *messages,
+                                                        guint n_messages,
+                                                        gboolean close,
+                                                        gpointer user_data);
+
+/**
  * GstRTSPClient:
  *
  * The client object represents the connection and its state with a client.
@@ -86,7 +108,7 @@ struct _GstRTSPClient {
  * @params_get: get parameters. This function should also initialize the
  *    RTSP response(ctx->response) via a call to gst_rtsp_message_init_response()
  * @tunnel_http_response: called when a response to the GET request is about to
- *   be sent for a tunneled connection. The response can be modified. Since 1.4
+ *   be sent for a tunneled connection. The response can be modified. Since: 1.4
  *
  * The client class structure.
  */
@@ -128,42 +150,83 @@ struct _GstRTSPClientClass {
   void     (*record_request)          (GstRTSPClient *client, GstRTSPContext *ctx);
   gchar*   (*check_requirements)      (GstRTSPClient *client, GstRTSPContext *ctx, gchar ** arr);
 
+  GstRTSPStatusCode (*pre_options_request)       (GstRTSPClient *client, GstRTSPContext *ctx);
+  GstRTSPStatusCode (*pre_describe_request)      (GstRTSPClient *client, GstRTSPContext *ctx);
+  GstRTSPStatusCode (*pre_setup_request)         (GstRTSPClient *client, GstRTSPContext *ctx);
+  GstRTSPStatusCode (*pre_play_request)          (GstRTSPClient *client, GstRTSPContext *ctx);
+  GstRTSPStatusCode (*pre_pause_request)         (GstRTSPClient *client, GstRTSPContext *ctx);
+  GstRTSPStatusCode (*pre_teardown_request)      (GstRTSPClient *client, GstRTSPContext *ctx);
+  GstRTSPStatusCode (*pre_set_parameter_request) (GstRTSPClient *client, GstRTSPContext *ctx);
+  GstRTSPStatusCode (*pre_get_parameter_request) (GstRTSPClient *client, GstRTSPContext *ctx);
+  GstRTSPStatusCode (*pre_announce_request)      (GstRTSPClient *client, GstRTSPContext *ctx);
+  GstRTSPStatusCode (*pre_record_request)        (GstRTSPClient *client, GstRTSPContext *ctx);
+
   /*< private >*/
-  gpointer _gst_reserved[GST_PADDING_LARGE-6];
+  gpointer _gst_reserved[GST_PADDING_LARGE-16];
 };
 
+GST_RTSP_SERVER_API
 GType                 gst_rtsp_client_get_type          (void);
 
+GST_RTSP_SERVER_API
 GstRTSPClient *       gst_rtsp_client_new               (void);
 
+GST_RTSP_SERVER_API
 void                  gst_rtsp_client_set_session_pool  (GstRTSPClient *client,
                                                          GstRTSPSessionPool *pool);
+
+GST_RTSP_SERVER_API
 GstRTSPSessionPool *  gst_rtsp_client_get_session_pool  (GstRTSPClient *client);
 
+GST_RTSP_SERVER_API
 void                  gst_rtsp_client_set_mount_points  (GstRTSPClient *client,
                                                          GstRTSPMountPoints *mounts);
+
+GST_RTSP_SERVER_API
 GstRTSPMountPoints *  gst_rtsp_client_get_mount_points  (GstRTSPClient *client);
 
+GST_RTSP_SERVER_API
 void                  gst_rtsp_client_set_auth          (GstRTSPClient *client, GstRTSPAuth *auth);
+
+GST_RTSP_SERVER_API
 GstRTSPAuth *         gst_rtsp_client_get_auth          (GstRTSPClient *client);
 
+GST_RTSP_SERVER_API
 void                  gst_rtsp_client_set_thread_pool   (GstRTSPClient *client, GstRTSPThreadPool *pool);
+
+GST_RTSP_SERVER_API
 GstRTSPThreadPool *   gst_rtsp_client_get_thread_pool   (GstRTSPClient *client);
 
+GST_RTSP_SERVER_API
 gboolean              gst_rtsp_client_set_connection    (GstRTSPClient *client, GstRTSPConnection *conn);
+
+GST_RTSP_SERVER_API
 GstRTSPConnection *   gst_rtsp_client_get_connection    (GstRTSPClient *client);
 
+GST_RTSP_SERVER_API
 guint                 gst_rtsp_client_attach            (GstRTSPClient *client,
                                                          GMainContext *context);
+
+GST_RTSP_SERVER_API
 void                  gst_rtsp_client_close             (GstRTSPClient * client);
 
+GST_RTSP_SERVER_API
 void                  gst_rtsp_client_set_send_func     (GstRTSPClient *client,
                                                          GstRTSPClientSendFunc func,
                                                          gpointer user_data,
                                                          GDestroyNotify notify);
 
+GST_RTSP_SERVER_API
+void                  gst_rtsp_client_set_send_messages_func (GstRTSPClient *client,
+                                                              GstRTSPClientSendMessagesFunc func,
+                                                              gpointer user_data,
+                                                              GDestroyNotify notify);
+
+GST_RTSP_SERVER_API
 GstRTSPResult         gst_rtsp_client_handle_message    (GstRTSPClient *client,
                                                          GstRTSPMessage *message);
+
+GST_RTSP_SERVER_API
 GstRTSPResult         gst_rtsp_client_send_message      (GstRTSPClient * client,
                                                          GstRTSPSession *session,
                                                          GstRTSPMessage *message);
@@ -191,11 +254,16 @@ typedef GstRTSPFilterResult (*GstRTSPClientSessionFilterFunc)  (GstRTSPClient *c
                                                                 GstRTSPSession *sess,
                                                                 gpointer user_data);
 
+GST_RTSP_SERVER_API
 GList *                gst_rtsp_client_session_filter    (GstRTSPClient *client,
                                                           GstRTSPClientSessionFilterFunc func,
                                                           gpointer user_data);
 
 
+
+#ifdef G_DEFINE_AUTOPTR_CLEANUP_FUNC
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(GstRTSPClient, gst_object_unref)
+#endif
 
 G_END_DECLS
 

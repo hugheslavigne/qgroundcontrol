@@ -1,7 +1,7 @@
 /*
- * gst-scte-section.h - 
+ * gst-scte-section.h -
  * Copyright (C) 2013, CableLabs, Louisville, CO 80027
- * 
+ *
  * Authors:
  *   RUIH Team <ruih@cablelabs.com>
  *
@@ -100,4 +100,3 @@ typedef enum {
 G_END_DECLS
 
 #endif  /* GST_SCTE_SECTION_H */
-

@@ -29,7 +29,8 @@ G_BEGIN_DECLS
 
 typedef struct _GstRTSPContext GstRTSPContext;
 
-#include "rtsp-server.h"
+#include "rtsp-server-prelude.h"
+#include "rtsp-server-object.h"
 #include "rtsp-media.h"
 #include "rtsp-media-factory.h"
 #include "rtsp-session-media.h"
@@ -78,10 +79,16 @@ struct _GstRTSPContext {
   gpointer            _gst_reserved[GST_PADDING - 1];
 };
 
+GST_RTSP_SERVER_API
 GType gst_rtsp_context_get_type (void);
 
+GST_RTSP_SERVER_API
 GstRTSPContext *     gst_rtsp_context_get_current   (void);
+
+GST_RTSP_SERVER_API
 void                 gst_rtsp_context_push_current  (GstRTSPContext * ctx);
+
+GST_RTSP_SERVER_API
 void                 gst_rtsp_context_pop_current   (GstRTSPContext * ctx);
 
 

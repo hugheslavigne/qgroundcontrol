@@ -29,13 +29,15 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include <gst/check/internal-check.h>
-
 #include <gst/gst.h>
+#include <gst/check/check-prelude.h>
+
+#define CK_DLL_EXP GST_CHECK_API
+#include <gst/check/internal-check.h>
 
 G_BEGIN_DECLS
 
-GST_DEBUG_CATEGORY_EXTERN (check_debug);
+GST_CHECK_API GstDebugCategory *check_debug;
 #define GST_CAT_DEFAULT check_debug
 
 /* logging function for tests
@@ -43,16 +45,17 @@ GST_DEBUG_CATEGORY_EXTERN (check_debug);
  * a gst unit test can be run with GST_TEST_DEBUG env var set to see the
  * messages
  */
-extern gboolean _gst_check_threads_running;
-extern gboolean _gst_check_raised_critical;
-extern gboolean _gst_check_raised_warning;
-extern gboolean _gst_check_expecting_log;
+GST_CHECK_API gboolean _gst_check_threads_running;
+GST_CHECK_API gboolean _gst_check_raised_critical;
+GST_CHECK_API gboolean _gst_check_raised_warning;
+GST_CHECK_API gboolean _gst_check_expecting_log;
+GST_CHECK_API gboolean _gst_check_list_tests;
 
 /* global variables used in test methods */
-extern GList * buffers;
+GST_CHECK_API GList * buffers;
 
-extern GMutex check_mutex;
-extern GCond check_cond;
+GST_CHECK_API GMutex check_mutex;
+GST_CHECK_API GCond check_cond;
 
 typedef struct
 {
@@ -62,53 +65,133 @@ typedef struct
 }
 GstCheckABIStruct;
 
+typedef struct _GstCheckLogFilter GstCheckLogFilter;
+
+/**
+ * GstCheckLogFilterFunc:
+ * @log_domain: the log domain of the message
+ * @log_level: the log level of the message
+ * @message: the message that has occurred
+ * @user_data: user data
+ *
+ * A function that is called for messages matching the filter added by
+ * @gst_check_add_log_filter.
+ *
+ * Returns: %TRUE if message should be discarded by GstCheck.
+ *
+ * Since: 1.12
+ */
+typedef gboolean (*GstCheckLogFilterFunc) (const gchar * log_domain,
+    GLogLevelFlags log_level, const gchar * message, gpointer user_data);
+
+GST_CHECK_API
 void gst_check_init (int *argc, char **argv[]);
 
+GST_CHECK_API
+GstCheckLogFilter * gst_check_add_log_filter (const gchar * log_domain,
+    GLogLevelFlags log_level, GRegex * regex, GstCheckLogFilterFunc func,
+    gpointer user_data, GDestroyNotify destroy_data);
+
+GST_CHECK_API
+void gst_check_remove_log_filter (GstCheckLogFilter * filter);
+
+GST_CHECK_API
+void gst_check_clear_log_filter (void);
+
+GST_CHECK_API
 GstFlowReturn gst_check_chain_func (GstPad * pad, GstObject * parent, GstBuffer * buffer);
 
+GST_CHECK_API
 void gst_check_message_error (GstMessage * message, GstMessageType type,
     GQuark domain, gint code);
 
+GST_CHECK_API
 GstElement *gst_check_setup_element (const gchar * factory);
+
+GST_CHECK_API
 void gst_check_teardown_element (GstElement * element);
+
+GST_CHECK_API
 GstPad *gst_check_setup_src_pad (GstElement * element,
     GstStaticPadTemplate * tmpl);
+
+GST_CHECK_API
 GstPad *gst_check_setup_src_pad_from_template (GstElement * element,
     GstPadTemplate * tmpl);
+
+GST_CHECK_API
 GstPad * gst_check_setup_src_pad_by_name (GstElement * element,
           GstStaticPadTemplate * tmpl, const gchar *name);
+
+GST_CHECK_API
 GstPad * gst_check_setup_src_pad_by_name_from_template (GstElement * element,
           GstPadTemplate * tmpl, const gchar *name);
+
+GST_CHECK_API
 GstPad *gst_check_setup_sink_pad (GstElement * element,
     GstStaticPadTemplate * tmpl);
+
+GST_CHECK_API
 GstPad *gst_check_setup_sink_pad_from_template (GstElement * element,
     GstPadTemplate * tmpl);
-GstPad * gst_check_setup_sink_pad_by_name (GstElement * element, 
+
+GST_CHECK_API
+GstPad * gst_check_setup_sink_pad_by_name (GstElement * element,
           GstStaticPadTemplate * tmpl, const gchar *name);
-GstPad * gst_check_setup_sink_pad_by_name_from_template (GstElement * element, 
+
+GST_CHECK_API
+GstPad * gst_check_setup_sink_pad_by_name_from_template (GstElement * element,
           GstPadTemplate * tmpl, const gchar *name);
+
+GST_CHECK_API
 void gst_check_teardown_pad_by_name (GstElement * element, const gchar *name);
+
+GST_CHECK_API
 void gst_check_teardown_src_pad (GstElement * element);
+
+GST_CHECK_API
 void gst_check_drop_buffers (void);
+
+GST_CHECK_API
 void gst_check_caps_equal (GstCaps * caps1, GstCaps * caps2);
+
+GST_CHECK_API
 void gst_check_buffer_data (GstBuffer * buffer, gconstpointer data, gsize size);
+
+GST_CHECK_API
 void gst_check_element_push_buffer_list (const gchar * element_name,
     GList * buffer_in, GstCaps * caps_in, GList * buffer_out,
     GstCaps * caps_out, GstFlowReturn last_flow_return);
+
+GST_CHECK_API
 void gst_check_element_push_buffer (const gchar * element_name,
     GstBuffer * buffer_in, GstCaps * caps_in, GstBuffer * buffer_out,
     GstCaps *caps_out);
+
+GST_CHECK_API
 void gst_check_teardown_sink_pad (GstElement * element);
+
+GST_CHECK_API
 void gst_check_abi_list (GstCheckABIStruct list[], gboolean have_abi_sizes);
+
+GST_CHECK_API
 gint gst_check_run_suite (Suite * suite, const gchar * name,
     const gchar * fname);
+
+GST_CHECK_API
 void gst_check_setup_events (GstPad * srcpad, GstElement * element,
     GstCaps * caps, GstFormat format);
+
+GST_CHECK_API
 void gst_check_setup_events_with_stream_id (GstPad * srcpad,
     GstElement * element, GstCaps * caps, GstFormat format,
     const gchar * stream_id);
+
+GST_CHECK_API
 void gst_check_objects_destroyed_on_unref (gpointer object_to_unref, gpointer first_object, ...)
   G_GNUC_NULL_TERMINATED;
+
+GST_CHECK_API
 void gst_check_object_destroyed_on_unref (gpointer object_to_unref);
 
 #define fail_unless_message_error(msg, domain, code)            \
@@ -140,7 +223,7 @@ G_STMT_START {                        \
  * wrapper for checks END_TEST
  */
 #define GST_START_TEST(__testname) \
-static void __testname (int __i__)\
+static void __testname (int G_GNUC_UNUSED __i__) \
 {\
   GST_DEBUG ("test start"); \
   GST_DO_CHECK_TEST_ENVIRONMENT; \
@@ -417,13 +500,31 @@ G_STMT_START {                                                    \
  */
 #define assert_equals_pointer(a, b) fail_unless_equals_pointer(a, b)
 
+/**
+ * fail_unless_equals_clocktime:
+ * @a: a #GstClockTime value or expression
+ * @b: a #GstClockTime value or expression
+ *
+ * This macro checks that @a and @b are equal and aborts if this is not the
+ * case, printing both expressions and the values they evaluated to. This
+ * macro is for use in unit tests.
+ */
+#define fail_unless_equals_clocktime(a, b)                              \
+G_STMT_START {                                                          \
+  GstClockTime first = a;                                                        \
+  GstClockTime second = b;                                                       \
+  fail_unless(first == second,                                          \
+    "'" #a "' (%" GST_TIME_FORMAT") is not equal to '" #b"' (%" GST_TIME_FORMAT")", \
+      GST_TIME_ARGS (first), GST_TIME_ARGS (second));       \
+} G_STMT_END;
+
 /***
  * thread test macros and variables
  */
-extern GList *thread_list;
-extern GMutex mutex;
-extern GCond start_cond;       /* used to notify main thread of thread startups */
-extern GCond sync_cond;        /* used to synchronize all threads and main thread */
+GST_CHECK_API GList *thread_list;
+GST_CHECK_API GMutex mutex;
+GST_CHECK_API GCond start_cond;       /* used to notify main thread of thread startups */
+GST_CHECK_API GCond sync_cond;        /* used to synchronize all threads and main thread */
 
 #define MAIN_START_THREADS(count, function, data)               \
 MAIN_INIT();                                                    \
@@ -516,6 +617,10 @@ G_STMT_START {                                                  \
 #define THREAD_TEST_RUNNING()   (!!_gst_check_threads_running)
 
 /* additional assertions */
+
+#if GST_DISABLE_GLIB_CHECKS
+#define ASSERT_CRITICAL(code)
+#else
 #define ASSERT_CRITICAL(code)                                   \
 G_STMT_START {                                                  \
   _gst_check_expecting_log = TRUE;                              \
@@ -526,6 +631,7 @@ G_STMT_START {                                                  \
         "Expected g_critical, got nothing", NULL);              \
   _gst_check_expecting_log = FALSE;                             \
 } G_STMT_END
+#endif /* GST_DISABLE_GLIB_CHECKS */
 
 #define ASSERT_WARNING(code)                                    \
 G_STMT_START {                                                  \
@@ -595,20 +701,26 @@ int main (int argc, char **argv)                                \
  * GST_CHECKS environment variable (test function names globs, comma
  * separated), or GST_CHECKS_IGNORE with the same semantics */
 
+GST_CHECK_API
 gboolean _gst_check_run_test_func (const gchar * func_name);
 
 static inline void
 __gst_tcase_add_test (TCase * tc, TFun tf, const char * fname, int signal,
     int allowed_exit_value, int start, int end)
 {
-  if (_gst_check_run_test_func (fname)) {
-    _tcase_add_test (tc, tf, fname, signal, allowed_exit_value, start, end);
-  }
+    if (_gst_check_list_tests) {
+        g_print ("Test: %s\n", fname);
+        return;
+    }
+
+    if (_gst_check_run_test_func (fname)) {
+        _tcase_add_test (tc, tf, fname, signal, allowed_exit_value, start, end);
+    }
 }
 
 #define _tcase_add_test __gst_tcase_add_test
 
-/* A special variant to add broken tests. These are normally skipped, but can be 
+/* A special variant to add broken tests. These are normally skipped, but can be
  * forced to run via GST_CHECKS */
 #define tcase_skip_broken_test(chain,test_func) \
 G_STMT_START {                                                  \
@@ -620,6 +732,9 @@ G_STMT_START {                                                  \
     g_printerr ("FIXME: skipping test %s because it's broken\n", G_STRINGIFY (test_func)); \
   } \
 } G_STMT_END
+
+#define tcase_skip_broken_loop_test(chain,test_func,a,b)        \
+  tcase_skip_broken_test (chain, test_func)
 
 G_END_DECLS
 

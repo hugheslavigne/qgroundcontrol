@@ -2,16 +2,57 @@
 #include <gst/gst.h>
 #include <gio/gio.h>
 #include <android/log.h>
+#include <string.h>
+
+/* XXX: Workaround for Android <21 making signal() an inline function
+ * around bsd_signal(), and Android >= 21 not having any bsd_signal()
+ * symbol but only signal().
+ * See https://bugzilla.gnome.org/show_bug.cgi?id=766235
+ */
+static gpointer
+load_real_signal (gpointer data)
+{
+  GModule *module;
+  gpointer ret = NULL;
+
+  module = g_module_open ("libc.so", G_MODULE_BIND_LOCAL);
+  g_module_symbol (module, "signal", &ret);
+
+  /* As fallback, let's try bsd_signal */
+  if (ret == NULL) {
+    g_warning ("Can't find signal(3) in libc.so!");
+    g_module_symbol (module, "bsd_signal", &ret);
+  }
+
+  g_module_close (module);
+
+  return ret;
+}
+
+__sighandler_t bsd_signal(int signum, __sighandler_t handler) __attribute__((weak));
+__sighandler_t bsd_signal(int signum, __sighandler_t handler)
+{
+  static GOnce gonce = G_ONCE_INIT;
+  __sighandler_t (*real_signal) (int signum, __sighandler_t handler);
+
+  g_once (&gonce, load_real_signal, NULL);
+
+  real_signal = gonce.retval;
+  g_assert (real_signal != NULL);
+
+  return real_signal(signum, handler);
+}
 
 static jobject _context = NULL;
 static jobject _class_loader = NULL;
+static JavaVM  *_java_vm = NULL;
 static GstClockTime _priv_gst_info_start_time;
 
 #define GST_G_IO_MODULE_DECLARE(name) \
-extern void G_PASTE(g_io_module_, G_PASTE(name, _load_static)) (void)
+extern void G_PASTE(g_io_, G_PASTE(name, _load)) (gpointer data)
 
 #define GST_G_IO_MODULE_LOAD(name) \
-G_PASTE(g_io_module_, G_PASTE(name, _load_static)) ()
+G_PASTE(g_io_, G_PASTE(name, _load)) (NULL)
 
 /* Declaration of static plugins */
  @PLUGINS_DECLARATION@
@@ -30,7 +71,27 @@ gst_android_register_static_plugins (void)
 void
 gst_android_load_gio_modules (void)
 {
- @G_IO_MODULES_LOAD@
+  GTlsBackend *backend;
+  const gchar *ca_certs;
+
+  @G_IO_MODULES_LOAD@
+
+  ca_certs = g_getenv ("CA_CERTIFICATES");
+
+  backend = g_tls_backend_get_default ();
+  if (backend && ca_certs) {
+    GTlsDatabase *db;
+    GError *error = NULL;
+
+    db = g_tls_file_database_new (ca_certs, &error);
+    if (db) {
+      g_tls_backend_set_default_database (backend, db);
+      g_object_unref (db);
+    } else {
+      g_warning ("Failed to create a database from file: %s",
+          error ? error->message : "Unknown");
+    }
+  }
 }
 
 static void
@@ -362,15 +423,21 @@ get_application_dirs (JNIEnv * env, jobject context, gchar ** cache_dir,
 }
 
 jobject
-gst_android_get_application_context ()
+gst_android_get_application_context (void)
 {
   return _context;
 }
 
 jobject
-gst_android_get_application_class_loader ()
+gst_android_get_application_class_loader (void)
 {
   return _class_loader;
+}
+
+JavaVM *
+gst_android_get_java_vm (void)
+{
+  return _java_vm;
 }
 
 static gboolean
@@ -447,7 +514,7 @@ gst_android_init (JNIEnv * env, jobject context)
     registry = g_build_filename (cache_dir, "registry.bin", NULL);
     g_setenv ("GST_REGISTRY", registry, TRUE);
     g_free (registry);
-    g_setenv ("GST_REUSE_PLUGIN_SCANNER", "no", TRUE);
+    g_setenv ("GST_REGISTRY_REUSE_PLUGIN_SCANNER", "no", TRUE);
     /* TODO: Should probably also set GST_PLUGIN_SCANNER and GST_PLUGIN_SYSTEM_PATH */
   }
   if (files_dir) {
@@ -534,6 +601,9 @@ JNI_OnLoad (JavaVM * vm, void * reserved)
     return 0;
   }
 
+  /* Remember Java VM */
+  _java_vm = vm;
+
   /* Tell the androidmedia plugin about the Java VM if we can */
   module = g_module_open (NULL, G_MODULE_BIND_LOCAL);
   if (module) {
@@ -569,4 +639,6 @@ JNI_OnUnload (JavaVM * vm, void * reversed)
     (*env)->DeleteGlobalRef (env, _class_loader);
     _class_loader = NULL;
   }
+
+  _java_vm = NULL;
 }

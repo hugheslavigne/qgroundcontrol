@@ -1,6 +1,6 @@
 /* graphene-gobject.h: Shared GObject types
  *
- * Copyright © 2014  Emmanuele Bassi
+ * Copyright 2014  Emmanuele Bassi
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -108,6 +108,11 @@ GType graphene_triangle_get_type (void);
 
 GRAPHENE_AVAILABLE_IN_1_2
 GType graphene_euler_get_type (void);
+
+#define GRAPHENE_TYPE_RAY               (graphene_ray_get_type ())
+
+GRAPHENE_AVAILABLE_IN_1_4
+GType graphene_ray_get_type (void);
 
 G_END_DECLS
 

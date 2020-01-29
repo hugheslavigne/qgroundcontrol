@@ -65,15 +65,26 @@ struct _GstRTSPMediaFactoryURIClass {
   gpointer _gst_reserved[GST_PADDING];
 };
 
+GST_RTSP_SERVER_API
 GType                 gst_rtsp_media_factory_uri_get_type   (void);
 
 /* creating the factory */
+
+GST_RTSP_SERVER_API
 GstRTSPMediaFactoryURI * gst_rtsp_media_factory_uri_new     (void);
 
 /* configuring the factory */
+
+GST_RTSP_SERVER_API
 void                  gst_rtsp_media_factory_uri_set_uri  (GstRTSPMediaFactoryURI *factory,
                                                            const gchar *uri);
+
+GST_RTSP_SERVER_API
 gchar *               gst_rtsp_media_factory_uri_get_uri  (GstRTSPMediaFactoryURI *factory);
+
+#ifdef G_DEFINE_AUTOPTR_CLEANUP_FUNC
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(GstRTSPMediaFactoryURI, gst_object_unref)
+#endif
 
 G_END_DECLS
 

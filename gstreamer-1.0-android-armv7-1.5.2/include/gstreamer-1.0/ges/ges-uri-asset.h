@@ -43,6 +43,7 @@ G_BEGIN_DECLS
 
 typedef struct _GESUriClipAssetPrivate GESUriClipAssetPrivate;
 
+GES_API
 GType ges_uri_clip_asset_get_type (void);
 
 struct _GESUriClipAsset
@@ -64,19 +65,31 @@ struct _GESUriClipAssetClass
   GstDiscoverer *discoverer;
   GstDiscoverer *sync_discoverer;
 
-  gpointer _ges_reserved[GES_PADDING];
+  void (*discovered) (GstDiscoverer * discoverer, GstDiscovererInfo * info,
+                     GError * err, gpointer user_data);
+
+  gpointer _ges_reserved[GES_PADDING -1];
 };
 
+GES_API
 GstDiscovererInfo *ges_uri_clip_asset_get_info      (const GESUriClipAsset * self);
+GES_API
 GstClockTime ges_uri_clip_asset_get_duration        (GESUriClipAsset *self);
+GES_API
 gboolean ges_uri_clip_asset_is_image                (GESUriClipAsset *self);
+GES_API
 void ges_uri_clip_asset_new                         (const gchar *uri,
                                                      GCancellable *cancellable,
                                                      GAsyncReadyCallback callback,
                                                      gpointer user_data);
+GES_API
+GESUriClipAsset * ges_uri_clip_asset_finish (GAsyncResult * res, GError ** error);
+GES_API
 GESUriClipAsset* ges_uri_clip_asset_request_sync    (const gchar *uri, GError **error);
+GES_API
 void ges_uri_clip_asset_class_set_timeout           (GESUriClipAssetClass *klass,
                                                      GstClockTime timeout);
+GES_API
 const GList * ges_uri_clip_asset_get_stream_assets  (GESUriClipAsset *self);
 
 #define GES_TYPE_URI_SOURCE_ASSET ges_uri_source_asset_get_type()
@@ -93,6 +106,7 @@ const GList * ges_uri_clip_asset_get_stream_assets  (GESUriClipAsset *self);
 
 typedef struct _GESUriSourceAssetPrivate GESUriSourceAssetPrivate;
 
+GES_API
 GType ges_uri_source_asset_get_type (void);
 
 struct _GESUriSourceAsset
@@ -112,8 +126,11 @@ struct _GESUriSourceAssetClass
 
   gpointer _ges_reserved[GES_PADDING];
 };
+GES_API
 GstDiscovererStreamInfo * ges_uri_source_asset_get_stream_info     (GESUriSourceAsset *asset);
+GES_API
 const gchar * ges_uri_source_asset_get_stream_uri                  (GESUriSourceAsset *asset);
+GES_API
 const GESUriClipAsset *ges_uri_source_asset_get_filesource_asset   (GESUriSourceAsset *asset);
 
 G_END_DECLS

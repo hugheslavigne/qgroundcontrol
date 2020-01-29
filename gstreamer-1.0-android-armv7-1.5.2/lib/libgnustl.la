@@ -5,19 +5,19 @@
 # It is necessary for linking the library.
 
 # The name that we can dlopen(3).
-dlname='libgnustl.so'
+dlname='libc++_shared.so'
 
 # Names of this library.
-library_names='libgnustl.so libgnustl.so libgnustl.so'
+library_names='libc++_shared.so libc++_shared.so libc++_shared.so'
 
 # The name of the static archive.
-old_library='libgnustl.a'
+old_library=''
 
 # Linker flags that can not go in dependency_libs.
 inherited_linker_flags=''
 
 # Libraries that this one depends upon.
-dependency_libs=' -lstdc++'
+dependency_libs='-lc++_shared /home/cerbero/cerbero/build/dist/android_universal/armv7/lib/libandroid_support.a /home/cerbero/cerbero/build/dist/android_universal/armv7/lib/libunwind.a'
 
 # Names of additional weak libraries provided by this library
 weak_library_names=''
@@ -38,4 +38,4 @@ dlopen=''
 dlpreopen=''
 
 # Directory that this library needs to be installed in:
-libdir='/home/slomo/cerbero/dist/android_armv7/lib'
+libdir='/home/cerbero/cerbero/build/dist/android_universal/armv7/lib'

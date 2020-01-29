@@ -100,7 +100,7 @@ Rectangle {
             id:                 settingsButton
             anchors.top:        parent.top
             anchors.bottom:     parent.bottom
-            source:             "/qmlimages/PaperPlane.svg"
+            source:             "/qmlimages/deleaves.svg"
             logo:               true
             checked:            false
             onClicked: {

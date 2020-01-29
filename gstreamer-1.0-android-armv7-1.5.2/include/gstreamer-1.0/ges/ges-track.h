@@ -81,21 +81,35 @@ struct _GESTrackClass
   gpointer    _ges_reserved[GES_PADDING];
 };
 
+GES_API
 const GstCaps*     ges_track_get_caps                        (GESTrack *track);
+GES_API
 GList*             ges_track_get_elements                    (GESTrack *track);
+GES_API
 const GESTimeline* ges_track_get_timeline                    (GESTrack *track);
+GES_API
 gboolean           ges_track_commit                          (GESTrack *track);
+GES_API
 void               ges_track_set_timeline                    (GESTrack *track, GESTimeline *timeline);
+GES_API
 gboolean           ges_track_add_element                     (GESTrack *track, GESTrackElement *object);
+GES_API
 gboolean           ges_track_remove_element                  (GESTrack *track, GESTrackElement *object);
+GES_API
 void               ges_track_set_create_element_for_gap_func (GESTrack *track, GESCreateElementForGapFunc func);
+GES_API
 void               ges_track_set_mixing                      (GESTrack *track, gboolean mixing);
+GES_API
 gboolean           ges_track_get_mixing                      (GESTrack *track);
+GES_API
 void               ges_track_set_restriction_caps            (GESTrack *track, const GstCaps *caps);
+GES_API
 void               ges_track_update_restriction_caps         (GESTrack *track, const GstCaps *caps);
 
 /* standard methods */
+GES_API
 GType              ges_track_get_type                        (void);
+GES_API
 GESTrack*          ges_track_new                             (GESTrackType type, GstCaps * caps);
 
 G_END_DECLS

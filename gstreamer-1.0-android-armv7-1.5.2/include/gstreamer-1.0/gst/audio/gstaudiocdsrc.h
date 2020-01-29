@@ -54,8 +54,6 @@ typedef enum {
   GST_AUDIO_CD_SRC_MODE_CONTINUOUS       /* stream = whole disc */
 } GstAudioCdSrcMode;
 
-#define GST_TYPE_AUDIO_CD_SRC_MODE          (gst_audio_cd_src_mode_get_type ())
-
 /**
  * GstAudioCdSrcTrack:
  * @is_audio: Whether this is an audio track
@@ -133,11 +131,16 @@ struct _GstAudioCdSrcClass {
   gpointer       _gst_reserved[GST_PADDING_LARGE];
 };
 
+GST_AUDIO_API
 GType    gst_audio_cd_src_get_type (void);
-GType    gst_audio_cd_src_mode_get_type (void);
 
+GST_AUDIO_API
 gboolean gst_audio_cd_src_add_track (GstAudioCdSrc      * src,
                                      GstAudioCdSrcTrack * track);
+
+#ifdef G_DEFINE_AUTOPTR_CLEANUP_FUNC
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(GstAudioCdSrc, gst_object_unref)
+#endif
 
 G_END_DECLS
 

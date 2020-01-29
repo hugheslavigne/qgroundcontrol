@@ -1,7 +1,7 @@
 /*-*- mode:C; -*- */
 /*
  * Check: a unit test framework for C
- * Copyright (C) 2001, 2002, Arien Malec
+ * Copyright (C) 2001, 2002 Arien Malec
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -15,8 +15,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
+ * MA 02110-1301, USA.
  */
 
 #ifndef CHECK_H
@@ -54,29 +54,40 @@ CK_CPPSTART
 #define CK_ATTRIBUTE_NORETURN
 #endif /* GCC 2.5 */
 #include <sys/types.h>
+
 /*
  * Used to create the linker script for hiding lib-local symbols. Shall
  * be put directly in front of the exported symbol.
  */
 #define CK_EXPORT
+
 /*
  * Used for MSVC to create the export attribute
  * CK_DLL_EXP is defined during the compilation of the library
  * on the command line.
  */
 #ifndef CK_DLL_EXP
-#define CK_DLL_EXP
+#  if defined(_MSC_VER)
+#    define CK_DLL_EXP __declspec(dllimport)
+#  else
+#    define CK_DLL_EXP extern
+#  endif
 #endif
+
 /* check version numbers */
 #define CHECK_MAJOR_VERSION (0)
 #define CHECK_MINOR_VERSION (9)
 #define CHECK_MICRO_VERSION (14)
-CK_DLL_EXP extern int CK_EXPORT check_major_version;
-CK_DLL_EXP extern int CK_EXPORT check_minor_version;
-CK_DLL_EXP extern int CK_EXPORT check_micro_version;
+CK_DLL_EXP /*extern*/ int CK_EXPORT check_major_version;
+CK_DLL_EXP /*extern*/ int CK_EXPORT check_minor_version;
+CK_DLL_EXP /*extern*/ int CK_EXPORT check_micro_version;
 
 #ifndef NULL
 #define NULL ((void*)0)
+#endif
+
+#if defined(_MSC_VER)
+#define pid_t int
 #endif
 
 /**
@@ -134,7 +145,10 @@ CK_DLL_EXP Suite *CK_EXPORT suite_create (const char *name);
 CK_DLL_EXP int CK_EXPORT suite_tcase (Suite * s, const char *tcname);
 
 /**
- * Add a test case to a suite
+ * Add a test case to a suite.
+ *
+ * Note that if the TCase has already been added attempting
+ * to add it again will be ignored.
  *
  * @param s suite to add test case to
  * @param tc test case to add to suite
@@ -158,6 +172,18 @@ CK_DLL_EXP void CK_EXPORT suite_add_tcase (Suite * s, TCase * tc);
  * */
 CK_DLL_EXP TCase *CK_EXPORT tcase_create (const char *name);
 
+/**
+ * Associate a test case with certain tags.
+ * Replaces any existing tags with the new set.
+ *
+ * @param tc the test case
+ *
+ * @param tags string containing arbitrary tags separated by spaces.
+ *        This will be copied. Passing NULL clears all tags.
+ *
+ * @since 0.11.0
+ * */
+CK_DLL_EXP void CK_EXPORT tcase_set_tags (TCase * tc, const char *tags);
 /**
  * Add a test function to a test case
  *
@@ -278,7 +304,7 @@ CK_DLL_EXP void CK_EXPORT _tcase_add_test (TCase * tc, TFun tf,
  *
  * Note that if a setup function fails, the remaining setup functions
  * will be omitted, as will the test case and the teardown functions.
- * If a teardown function fails the remaining teardown functins will be
+ * If a teardown function fails the remaining teardown functions will be
  * omitted.
  *
  * @param tc test case to add unchecked fixture setup/teardown to
@@ -306,7 +332,7 @@ CK_DLL_EXP void CK_EXPORT tcase_add_unchecked_fixture (TCase * tc, SFun setup,
  *
  * Note that if a setup function fails, the remaining setup functions
  * will be omitted, as will the test and the teardown functions. If a
- * teardown function fails the remaining teardown functins will be
+ * teardown function fails the remaining teardown functions will be
  * omitted.
  *
  * @param tc test case to add checked fixture setup/teardown to
@@ -329,6 +355,9 @@ CK_DLL_EXP void CK_EXPORT tcase_add_checked_fixture (TCase * tc, SFun setup,
  * If not set, the default timeout is one assigned at compile time. If
  * the environment variable CK_DEFAULT_TIMEOUT is defined and no timeout
  * is set, the value in the environment variable is used.
+ *
+ * If Check is compile without fork() support this call is ignored,
+ * as timeouts are not possible.
  *
  * @param tc test case to assign timeout to
  * @param timeout to use, in seconds. If the value contains a decimal
@@ -938,8 +967,9 @@ CK_DLL_EXP void CK_EXPORT srunner_free (SRunner * sr);
  * In addition to running all suites, if the suite runner has been
  * configured to output to a log, that is also performed.
  *
- * Note that if the CK_RUN_CASE and/or CK_RUN_SUITE environment variables
- * are defined, then only the named suite and/or test case is run.
+ * Note that if the CK_RUN_CASE, CK_RUN_SUITE, CK_INCLUDE_TAGS and/or
+ * CK_EXCLUDE_TAGS environment variables are defined, then only the
+ * named suites or test cases will run.
  *
  * @param sr suite runner to run all suites from
  * @param print_mode the verbosity in which to report results to stdout
@@ -957,9 +987,22 @@ CK_DLL_EXP void CK_EXPORT srunner_run_all (SRunner * sr,
  * suite runner has been configured to output to a log, that is also
  * performed.
  *
+ * Note that if the sname and tcname parameters are passed as null
+ * then the function will fallback to using the environment variables
+ * CK_RUN_SUITE and CK_RUN_CASE respectively in order to select the
+ * suite/cases.
+ * 
+ * Similarly if the CK_INCLUDE_TAGS and/or CK_EXCLUDE_TAGS environment
+ * variables are defined then these will further filter the test cases
+ * (see srunner_run_tagged, below).
+ *
  * @param sr suite runner where the given suite or test case must be
- * @param sname suite name to run. A NULL means "any suite".
- * @param tcname test case name to run. A NULL means "any test case"
+ * @param sname suite name to run. A NULL means use the value of the
+ * environment variable CK_RUN_SUITE if set, otherwise run "any/every
+ * suite".
+ * @param tcname test case name to run. A NULL means use the value of
+ * the environment variable CK_RUN_CASE if set, otherwise run
+ * "any/every case".
  * @param print_mode the verbosity in which to report results to stdout
  *
  * @since 0.9.9
@@ -967,6 +1010,45 @@ CK_DLL_EXP void CK_EXPORT srunner_run_all (SRunner * sr,
 CK_DLL_EXP void CK_EXPORT srunner_run (SRunner * sr, const char *sname,
     const char *tcname, enum print_output print_mode);
 
+
+/**
+ * Run a specific suite or test case or testcases with specific tags
+ * from a suite runner, printing results to stdout as specified by the
+ * print_mode.
+ *
+ * In addition to running any applicable suites or test cases, if the
+ * suite runner has been configured to output to a log, that is also
+ * performed.
+ *
+ * Note that if sname, tcname, include_tags, exclude_tags parameters
+ * are passed as NULL then if the environment variables CK_RUN_SUITE,
+ * CK_RUN_CASE, CK_INCLUDE_TAGS, CK_EXCLUDE_TAGS are defined then these
+ * values will be used instead.
+ *
+ * @param sr suite runner where the given suite or test case must be
+ * @param sname suite name to run. A NULL means use the value of the
+ * environment variable CK_RUN_SUITE if set, otherwise run "any/every
+ * suite".
+ * @param tcname test case name to run. A NULL means use the value of
+ * the environment variable CK_RUN_CASE if set, otherwise run
+ * "any/every case".
+ * @param include_tags space separate list of tags. Only run test
+ * cases that share one of these tags. A NULL means use the value of
+ * the environment variable CK_INCLUDE_TAGS if set, otherwise run
+ * "any/every test case".
+ * @param exclude_tags space separate list of tags. Only run test
+ * cases that do not share one of these tags even if they are selected
+ * by an included tag. A NULL means use the value of the environment
+ * variable CK_EXCLUDE_TAGS if set, otherwise run "any/every test
+ * case".
+ * @param print_mode the verbosity in which to report results to stdout
+ *
+ * @since 0.11.0
+ */
+CK_DLL_EXP void CK_EXPORT srunner_run_tagged (SRunner * sr, const char *sname,
+    const char *tcname,
+    const char *include_tags,
+    const char *exclude_tags, enum print_output print_mode);
 
 /**
  * Retrieve the number of failed tests executed by a suite runner.
@@ -1194,6 +1276,9 @@ CK_DLL_EXP enum fork_status CK_EXPORT srunner_fork_status (SRunner * sr);
  * If set to CK_FORK or CK_NOFORK, the environment variable
  * if defined is ignored.
  *
+ * If Check is compiled without support for fork(), attempting
+ * to set the status to CK_FORK is ignored.
+ *
  * @param sr suite runner to assign the fork status to
  * @param fstat fork status to assign
  *
@@ -1212,13 +1297,19 @@ CK_DLL_EXP void CK_EXPORT srunner_set_fork_status (SRunner * sr,
  * the process group will be killed; using this wrapper will prevent
  * orphan processes.
  *
+ * If Check is compiled without fork() support this call simply
+ * return -1 and does nothing.
+ *
  * @return On success, the PID of the child process is returned in
  *          the parent, and 0 is returned in the child.  On failure,
- *          an error will be printed and exit() invoked.
+ *          a value of -1 is returned to the parent process and no
+ *          child process is created.
  *
  * @since 0.9.3
  */
+#if !defined(_MSC_VER)
 CK_DLL_EXP pid_t CK_EXPORT check_fork (void);
+#endif
 
 /**
  * Wait for the pid and exit.
@@ -1228,13 +1319,18 @@ CK_DLL_EXP pid_t CK_EXPORT check_fork (void);
  * exited without error, exit(EXIT_SUCCESS) is invoked; otherwise
  * exit(EXIT_FAILURE) is invoked.
  *
+ * If Check is compiled without support for fork(), this invokes
+ * exit(EXIT_FAILURE).
+ *
  * @param pid process to wait for, created by check_fork()
  *
  * @since 0.9.3
  */
+#if !defined(_MSC_VER)
 CK_DLL_EXP void CK_EXPORT
 check_waitpid_and_exit (pid_t pid)
     CK_ATTRIBUTE_NORETURN;
+#endif
 
 #ifdef __cplusplus
 CK_CPPEND

@@ -1,6 +1,6 @@
 /* graphene-matrix.h: 4x4 matrix
  *
- * Copyright © 2014  Emmanuele Bassi
+ * Copyright 2014  Emmanuele Bassi
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -39,7 +39,7 @@ GRAPHENE_BEGIN_DECLS
 struct _graphene_matrix_t
 {
   /*< private >*/
-  GRAPHENE_PRIVATE_FIELD (graphene_simd4x4f_t, value);
+  GRAPHENE_ALIGN16 GRAPHENE_PRIVATE_FIELD (graphene_simd4x4f_t, value);
 };
 
 GRAPHENE_AVAILABLE_IN_1_0
@@ -183,6 +183,10 @@ GRAPHENE_AVAILABLE_IN_1_2
 void                    graphene_matrix_transform_box           (const graphene_matrix_t  *m,
                                                                  const graphene_box_t     *b,
                                                                  graphene_box_t           *res);
+GRAPHENE_AVAILABLE_IN_1_4
+void                    graphene_matrix_transform_ray           (const graphene_matrix_t  *m,
+                                                                 const graphene_ray_t     *r,
+                                                                 graphene_ray_t           *res);
 
 GRAPHENE_AVAILABLE_IN_1_0
 void                    graphene_matrix_project_point           (const graphene_matrix_t  *m,
@@ -253,7 +257,7 @@ GRAPHENE_AVAILABLE_IN_1_0
 void                    graphene_matrix_transpose               (const graphene_matrix_t  *m,
                                                                  graphene_matrix_t        *res);
 GRAPHENE_AVAILABLE_IN_1_0
-void                    graphene_matrix_inverse                 (const graphene_matrix_t  *m,
+bool                    graphene_matrix_inverse                 (const graphene_matrix_t  *m,
                                                                  graphene_matrix_t        *res);
 GRAPHENE_AVAILABLE_IN_1_0
 void                    graphene_matrix_perspective             (const graphene_matrix_t  *m,

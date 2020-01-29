@@ -9,16 +9,16 @@
 
 # Author: Simon Josefsson
 
-prefix=/home/slomo/cerbero/dist/android_armv7
+prefix=/home/cerbero/cerbero/build/dist/android_universal/armv7
 exec_prefix=${prefix}
-libdir=/home/slomo/cerbero/dist/android_armv7/lib
+libdir=/home/cerbero/cerbero/build/dist/android_universal/armv7/lib
 includedir=${prefix}/include
 
 Name: GnuTLS
 Description: Transport Security Layer implementation for the GNU system
 URL: http://www.gnutls.org/
-Version: 3.3.14
+Version: 3.5.18
 Libs: -L${libdir} -lgnutls
-Libs.private: -L/home/slomo/cerbero/dist/android_armv7/lib -lz -R/home/slomo/cerbero/dist/android_armv7/lib -L/home/slomo/cerbero/dist/android_armv7/lib -lintl -L/home/slomo/cerbero/dist/android_armv7/lib -liconv -L/home/slomo/Projects/android/android-ndk-r10d/platforms/android-9/arch-arm/usr/lib -lc -R/home/slomo/cerbero/dist/android_armv7/lib -R/home/slomo/Projects/android/android-ndk-r10d/platforms/android-9/arch-arm/usr/lib   -L/home/slomo/cerbero/dist/android_armv7/lib -liconv -R/home/slomo/cerbero/dist/android_armv7/lib    -lgmp
+Libs.private:  /home/cerbero/cerbero/build/dist/android_universal/armv7/lib/libintl.so -Wl,-rpath -Wl,/home/cerbero/cerbero/build/dist/android_universal/armv7/lib      -lgmp  
 Requires.private: nettle, hogweed, libtasn1, zlib
 Cflags: -I${includedir}

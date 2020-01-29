@@ -1,6 +1,6 @@
 /* graphene-frustum.h: A 3D field of view
  *
- * Copyright © 2014  Emmanuele Bassi
+ * Copyright 2014  Emmanuele Bassi
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -83,6 +83,10 @@ bool                    graphene_frustum_intersects_box         (const graphene_
 GRAPHENE_AVAILABLE_IN_1_2
 void                    graphene_frustum_get_planes             (const graphene_frustum_t *f,
                                                                  graphene_plane_t          planes[]);
+
+GRAPHENE_AVAILABLE_IN_1_6
+bool                    graphene_frustum_equal                  (const graphene_frustum_t *a,
+                                                                 const graphene_frustum_t *b);
 
 GRAPHENE_END_DECLS
 

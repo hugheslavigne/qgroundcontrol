@@ -24,6 +24,8 @@
 #ifndef __GST_RTSP_STREAM_TRANSPORT_H__
 #define __GST_RTSP_STREAM_TRANSPORT_H__
 
+#include "rtsp-server-prelude.h"
+
 G_BEGIN_DECLS
 
 /* types for the media */
@@ -54,6 +56,22 @@ typedef struct _GstRTSPStreamTransportPrivate GstRTSPStreamTransportPrivate;
  * Returns: %TRUE on success
  */
 typedef gboolean (*GstRTSPSendFunc)      (GstBuffer *buffer, guint8 channel, gpointer user_data);
+
+/**
+ * GstRTSPSendListFunc:
+ * @buffer_list: a #GstBufferList
+ * @channel: a channel
+ * @user_data: user data
+ *
+ * Function registered with gst_rtsp_stream_transport_set_callbacks() and
+ * called when @buffer_list must be sent on @channel.
+ *
+ * Returns: %TRUE on success
+ *
+ * Since: 1.16
+ */
+typedef gboolean (*GstRTSPSendListFunc)      (GstBufferList *buffer_list, guint8 channel, gpointer user_data);
+
 /**
  * GstRTSPKeepAliveFunc:
  * @user_data: user data
@@ -62,6 +80,15 @@ typedef gboolean (*GstRTSPSendFunc)      (GstBuffer *buffer, guint8 channel, gpo
  * when the stream is active.
  */
 typedef void     (*GstRTSPKeepAliveFunc) (gpointer user_data);
+
+/**
+ * GstRTSPMessageSentFunc:
+ * @user_data: user data
+ *
+ * Function registered with gst_rtsp_stream_transport_set_message_sent()
+ * and called when a message has been sent on the transport.
+ */
+typedef void     (*GstRTSPMessageSentFunc) (gpointer user_data);
 
 /**
  * GstRTSPStreamTransport:
@@ -84,52 +111,103 @@ struct _GstRTSPStreamTransportClass {
   gpointer _gst_reserved[GST_PADDING];
 };
 
+GST_RTSP_SERVER_API
 GType                    gst_rtsp_stream_transport_get_type (void);
 
+GST_RTSP_SERVER_API
 GstRTSPStreamTransport * gst_rtsp_stream_transport_new           (GstRTSPStream *stream,
                                                                   GstRTSPTransport *tr);
 
+GST_RTSP_SERVER_API
 GstRTSPStream *          gst_rtsp_stream_transport_get_stream    (GstRTSPStreamTransport *trans);
 
+GST_RTSP_SERVER_API
 void                     gst_rtsp_stream_transport_set_transport (GstRTSPStreamTransport *trans,
                                                                   GstRTSPTransport * tr);
+
+GST_RTSP_SERVER_API
 const GstRTSPTransport * gst_rtsp_stream_transport_get_transport (GstRTSPStreamTransport *trans);
 
+GST_RTSP_SERVER_API
 void                     gst_rtsp_stream_transport_set_url       (GstRTSPStreamTransport *trans,
                                                                   const GstRTSPUrl * url);
+
+GST_RTSP_SERVER_API
 const GstRTSPUrl *       gst_rtsp_stream_transport_get_url       (GstRTSPStreamTransport *trans);
 
 
+GST_RTSP_SERVER_API
 gchar *                  gst_rtsp_stream_transport_get_rtpinfo   (GstRTSPStreamTransport *trans,
                                                                   GstClockTime start_time);
 
+GST_RTSP_SERVER_API
 void                     gst_rtsp_stream_transport_set_callbacks (GstRTSPStreamTransport *trans,
                                                                   GstRTSPSendFunc send_rtp,
                                                                   GstRTSPSendFunc send_rtcp,
                                                                   gpointer user_data,
                                                                   GDestroyNotify  notify);
+
+GST_RTSP_SERVER_API
+void                     gst_rtsp_stream_transport_set_list_callbacks (GstRTSPStreamTransport *trans,
+                                                                       GstRTSPSendListFunc send_rtp_list,
+                                                                       GstRTSPSendListFunc send_rtcp_list,
+                                                                       gpointer user_data,
+                                                                       GDestroyNotify  notify);
+
+GST_RTSP_SERVER_API
 void                     gst_rtsp_stream_transport_set_keepalive (GstRTSPStreamTransport *trans,
                                                                   GstRTSPKeepAliveFunc keep_alive,
                                                                   gpointer user_data,
                                                                   GDestroyNotify  notify);
+
+GST_RTSP_SERVER_API
+void                     gst_rtsp_stream_transport_set_message_sent (GstRTSPStreamTransport *trans,
+                                                                  GstRTSPMessageSentFunc message_sent,
+                                                                  gpointer user_data,
+                                                                  GDestroyNotify  notify);
+
+GST_RTSP_SERVER_API
 void                     gst_rtsp_stream_transport_keep_alive    (GstRTSPStreamTransport *trans);
 
+GST_RTSP_SERVER_API
+void                     gst_rtsp_stream_transport_message_sent  (GstRTSPStreamTransport *trans);
+
+GST_RTSP_SERVER_API
 gboolean                 gst_rtsp_stream_transport_set_active    (GstRTSPStreamTransport *trans,
                                                                   gboolean active);
 
+GST_RTSP_SERVER_API
 void                     gst_rtsp_stream_transport_set_timed_out (GstRTSPStreamTransport *trans,
                                                                   gboolean timedout);
+
+GST_RTSP_SERVER_API
 gboolean                 gst_rtsp_stream_transport_is_timed_out  (GstRTSPStreamTransport *trans);
 
 
 
+GST_RTSP_SERVER_API
 gboolean                 gst_rtsp_stream_transport_send_rtp      (GstRTSPStreamTransport *trans,
                                                                   GstBuffer *buffer);
+
+GST_RTSP_SERVER_API
 gboolean                 gst_rtsp_stream_transport_send_rtcp     (GstRTSPStreamTransport *trans,
                                                                   GstBuffer *buffer);
 
+GST_RTSP_SERVER_API
+gboolean                 gst_rtsp_stream_transport_send_rtp_list (GstRTSPStreamTransport *trans,
+                                                                  GstBufferList *buffer_list);
+
+GST_RTSP_SERVER_API
+gboolean                 gst_rtsp_stream_transport_send_rtcp_list(GstRTSPStreamTransport *trans,
+                                                                  GstBufferList *buffer_list);
+
+GST_RTSP_SERVER_API
 GstFlowReturn            gst_rtsp_stream_transport_recv_data     (GstRTSPStreamTransport *trans,
                                                                   guint channel, GstBuffer *buffer);
+
+#ifdef G_DEFINE_AUTOPTR_CLEANUP_FUNC
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(GstRTSPStreamTransport, gst_object_unref)
+#endif
 
 G_END_DECLS
 

@@ -8,7 +8,7 @@
 dlname='libz.so.1'
 
 # Names of this library.
-library_names='libz.so.1.8 libz.so.1 libz.so'
+library_names='libz.so.1.2.11 libz.so.1 libz.so'
 
 # The name of the static archive.
 old_library='libz.a'
@@ -25,7 +25,7 @@ weak_library_names=''
 # Version information for libglib-2.0.
 current=2
 age=2
-revision=8
+revision=11
 
 # Is this an already installed library?
 installed=yes
@@ -38,4 +38,4 @@ dlopen=''
 dlpreopen=''
 
 # Directory that this library needs to be installed in:
-libdir='/home/slomo/cerbero/dist/android_armv7/lib'
+libdir='/home/cerbero/cerbero/build/dist/android_universal/armv7/lib'

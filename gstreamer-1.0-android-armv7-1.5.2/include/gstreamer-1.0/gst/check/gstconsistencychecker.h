@@ -34,13 +34,17 @@ G_BEGIN_DECLS
  */
 typedef struct _GstStreamConsistency GstStreamConsistency;
 
-
+GST_CHECK_API
 GstStreamConsistency * gst_consistency_checker_new     (GstPad * pad);
+
+GST_CHECK_API
 gboolean               gst_consistency_checker_add_pad (GstStreamConsistency * consist,
                                                         GstPad * pad);
 
+GST_CHECK_API
 void                   gst_consistency_checker_reset   (GstStreamConsistency * consist);
 
+GST_CHECK_API
 void                   gst_consistency_checker_free    (GstStreamConsistency * consist);
 
 G_END_DECLS

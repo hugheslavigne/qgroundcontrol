@@ -56,11 +56,15 @@ typedef struct {
 	void      (* closing)     (SoupWebsocketConnection *self);
 
 	void      (* closed)      (SoupWebsocketConnection *self);
+
+	void      (* pong)        (SoupWebsocketConnection *self,
+				   GBytes *message);
 } SoupWebsocketConnectionClass;
 
 SOUP_AVAILABLE_IN_2_50
 GType soup_websocket_connection_get_type (void) G_GNUC_CONST;
 
+SOUP_AVAILABLE_IN_2_50
 SoupWebsocketConnection *soup_websocket_connection_new (GIOStream                    *stream,
 							SoupURI                      *uri,
 							SoupWebsocketConnectionType   type,
@@ -103,6 +107,20 @@ SOUP_AVAILABLE_IN_2_50
 void                soup_websocket_connection_close          (SoupWebsocketConnection *self,
 							      gushort code,
 							      const char *data);
+
+SOUP_AVAILABLE_IN_2_56
+guint64             soup_websocket_connection_get_max_incoming_payload_size (SoupWebsocketConnection *self);
+
+SOUP_AVAILABLE_IN_2_56
+void                soup_websocket_connection_set_max_incoming_payload_size (SoupWebsocketConnection *self,
+                                                                             guint64                  max_incoming_payload_size);
+
+SOUP_AVAILABLE_IN_2_58
+guint               soup_websocket_connection_get_keepalive_interval (SoupWebsocketConnection *self);
+
+SOUP_AVAILABLE_IN_2_58
+void                soup_websocket_connection_set_keepalive_interval (SoupWebsocketConnection *self,
+                                                                      guint                    interval);
 
 G_END_DECLS
 

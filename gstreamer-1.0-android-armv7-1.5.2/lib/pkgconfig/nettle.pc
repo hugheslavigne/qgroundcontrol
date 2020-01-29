@@ -1,11 +1,11 @@
-prefix=/home/slomo/cerbero/dist/android_armv7
+prefix=/home/cerbero/cerbero/build/dist/android_universal/armv7
 exec_prefix=${prefix}
-libdir=/home/slomo/cerbero/dist/android_armv7/lib
+libdir=/home/cerbero/cerbero/build/dist/android_universal/armv7/lib
 includedir=${prefix}/include
 
 Name: Nettle
 Description: Nettle low-level cryptographic library (symmetric algorithms)
 URL: http://www.lysator.liu.se/~nisse/nettle
-Version: 2.7.1
+Version: 3.4
 Libs: -L${libdir} -lnettle
 Cflags: -I${includedir}

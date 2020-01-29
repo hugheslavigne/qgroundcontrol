@@ -25,6 +25,7 @@
 
 #include <gst/gst.h>
 #include <gst/base/gstbasesink.h>
+#include <gst/video/video-prelude.h>
 
 G_BEGIN_DECLS
 
@@ -105,7 +106,7 @@ struct _GstVideoSink {
  * @parent_class: the parent class structure
  * @show_frame: render a video frame. Maps to #GstBaseSinkClass.render() and
  *     #GstBaseSinkClass.preroll() vfuncs. Rendering during preroll will be
- *     suppressed if the #GstVideoSink:show-preroll-frame property is set to 
+ *     suppressed if the #GstVideoSink:show-preroll-frame property is set to
  *     %FALSE.
  *
  * The video sink class structure. Derived classes should override the
@@ -120,10 +121,16 @@ struct _GstVideoSinkClass {
   gpointer _gst_reserved[GST_PADDING];
 };
 
+GST_VIDEO_API
 GType gst_video_sink_get_type (void);
 
+GST_VIDEO_API
 void gst_video_sink_center_rect (GstVideoRectangle src, GstVideoRectangle dst,
                                  GstVideoRectangle *result, gboolean scaling);
+
+#ifdef G_DEFINE_AUTOPTR_CLEANUP_FUNC
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(GstVideoSink, gst_object_unref)
+#endif
 
 G_END_DECLS
 

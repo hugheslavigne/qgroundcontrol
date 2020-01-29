@@ -17,14 +17,14 @@ old_library='libpng16.a'
 inherited_linker_flags=''
 
 # Libraries that this one depends upon.
-dependency_libs=' -L/home/slomo/cerbero/dist/android_armv7/lib -L/home/slomo/Projects/android/android-ndk-r10d/platforms/android-9/arch-arm/usr/lib /home/slomo/cerbero/dist/android_armv7/lib/libz.la -lm'
+dependency_libs=' -L/home/cerbero/cerbero/build/dist/android_universal/armv7/lib -L/home/cerbero/cerbero/build/android-ndk-18/platforms/android-16/arch-arm/usr/lib /home/cerbero/cerbero/build/dist/android_universal/armv7/lib/libz.la -lm'
 
 # Names of additional weak libraries provided by this library
 weak_library_names=''
 
 # Version information for libpng16.
-current=33
-age=17
+current=53
+age=37
 revision=0
 
 # Is this an already installed library?
@@ -38,4 +38,4 @@ dlopen=''
 dlpreopen=''
 
 # Directory that this library needs to be installed in:
-libdir='/home/slomo/cerbero/dist/android_armv7/lib'
+libdir='/home/cerbero/cerbero/build/dist/android_universal/armv7/lib'

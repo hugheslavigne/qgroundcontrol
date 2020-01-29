@@ -1,10 +1,10 @@
-prefix=/home/slomo/cerbero/dist/android_armv7
+prefix=/home/cerbero/cerbero/build/dist/android_universal/armv7
 exec_prefix=${prefix}
-libdir=/home/slomo/cerbero/dist/android_armv7/lib
+libdir=/home/cerbero/cerbero/build/dist/android_universal/armv7/lib
 includedir=${prefix}/include
 
 Name: libcroco
-Version: 0.6.8
+Version: 0.6.13
 Description: a CSS2 Parsing and manipulation Library in C.
 Requires: glib-2.0 libxml-2.0
 Libs: -L${libdir} -lcroco-0.6

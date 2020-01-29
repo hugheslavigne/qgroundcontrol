@@ -23,6 +23,7 @@
 #define _GES_ASSET_
 
 #include <glib-object.h>
+#include <ges/ges-extractable.h>
 #include <ges/ges-types.h>
 #include <ges/ges-enums.h>
 #include <gio/gio.h>
@@ -50,6 +51,7 @@ typedef enum
 
 typedef struct _GESAssetPrivate GESAssetPrivate;
 
+GES_API
 GType ges_asset_get_type (void);
 
 struct _GESAsset
@@ -74,6 +76,10 @@ struct _GESAssetClass
   /* Let subclasses know that we proxied an asset */
   void                     (*inform_proxy)      (GESAsset *self,
                                                  const gchar *proxy_id);
+
+  void                     (*proxied)      (GESAsset *self,
+                                            GESAsset *proxy);
+
   /* Ask subclasses for a new ID for @self when the asset failed loading
    * This function returns %FALSE when the ID could be updated or %TRUE
    * otherwize */
@@ -83,21 +89,45 @@ struct _GESAssetClass
   gpointer _ges_reserved[GES_PADDING];
 };
 
+GES_API
 GType ges_asset_get_extractable_type (GESAsset * self);
+GES_API
 void ges_asset_request_async         (GType extractable_type,
                                       const gchar * id,
                                       GCancellable *cancellable,
                                       GAsyncReadyCallback callback,
                                       gpointer user_data);
+GES_API
 GESAsset * ges_asset_request         (GType extractable_type,
                                       const gchar * id,
                                       GError **error);
+GES_API
 const gchar * ges_asset_get_id       (GESAsset* self);
+GES_API
 GESAsset * ges_asset_request_finish  (GAsyncResult *res,
                                       GError **error);
+GES_API
+GError * ges_asset_get_error         (GESAsset * self);
+GES_API
 GESExtractable * ges_asset_extract   (GESAsset * self,
                                       GError **error);
+GES_API
 GList * ges_list_assets              (GType filter);
+
+
+GES_API
+gboolean ges_asset_set_proxy         (GESAsset *asset, GESAsset *proxy);
+GES_API
+gboolean ges_asset_unproxy           (GESAsset *asset, GESAsset * proxy);
+GES_API
+GList * ges_asset_list_proxies       (GESAsset *asset);
+GES_API
+GESAsset * ges_asset_get_proxy_target(GESAsset *proxy);
+GES_API
+GESAsset * ges_asset_get_proxy       (GESAsset *asset);
+GES_API
+gboolean ges_asset_needs_reload 	 (GType extractable_type,
+									  const gchar * id);
 
 G_END_DECLS
 #endif /* _GES_ASSET */

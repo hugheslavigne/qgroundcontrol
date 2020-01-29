@@ -26,11 +26,13 @@
 #ifndef TAGLIB_H
 #define TAGLIB_H
 
-#define TAGLIB_MAJOR_VERSION 1
-#define TAGLIB_MINOR_VERSION 7
-#define TAGLIB_PATCH_VERSION 0
+#include "taglib_config.h"
 
-#if defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 1))
+#define TAGLIB_MAJOR_VERSION 1
+#define TAGLIB_MINOR_VERSION 11
+#define TAGLIB_PATCH_VERSION 1
+
+#if defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 1)) || defined(__clang__)
 #define TAGLIB_IGNORE_MISSING_DESTRUCTOR _Pragma("GCC diagnostic ignored \"-Wnon-virtual-dtor\"")
 #else
 #define TAGLIB_IGNORE_MISSING_DESTRUCTOR
@@ -48,7 +50,7 @@
 
 /*!
  * This namespace contains everything in TagLib.  For projects working with
- * TagLib extensively it may be conveniten to add a
+ * TagLib extensively it may be convenient to add a
  * \code
  * using namespace TagLib;
  * \endcode
@@ -58,38 +60,20 @@ namespace TagLib {
 
   class String;
 
-  typedef wchar_t wchar;
-  typedef unsigned char uchar;
-  typedef unsigned int  uint;
-  typedef unsigned long ulong;
+  // These integer types are deprecated. Do not use them.
+
+  typedef wchar_t            wchar;   // Assumed to be sufficient to store a UTF-16 char.
+  typedef unsigned char      uchar;
+  typedef unsigned short     ushort;
+  typedef unsigned int       uint;
+  typedef unsigned long      ulong;
+  typedef unsigned long long ulonglong;
 
   /*!
    * Unfortunately std::wstring isn't defined on some systems, (i.e. GCC < 3)
    * so I'm providing something here that should be constant.
    */
-  typedef std::basic_string<wchar> wstring;
-
-#ifndef DO_NOT_DOCUMENT // Tell Doxygen to skip this class.
-  /*!
-   * \internal
-   * This is just used as a base class for shared classes in TagLib.
-   *
-   * \warning This <b>is not</b> part of the TagLib public API!
-   */
-
-  class RefCounter
-  {
-  public:
-    RefCounter() : refCount(1) {}
-    void ref() { refCount++; }
-    bool deref() { return ! --refCount ; }
-    int count() { return refCount; }
-  private:
-    uint refCount;
-  };
-
-#endif // DO_NOT_DOCUMENT
-
+  typedef std::basic_string<wchar_t> wstring;
 }
 
 /*!
@@ -103,14 +87,14 @@ namespace TagLib {
  * - A clean, high level, C++ API to handling audio meta data.
  * - Format specific APIs for advanced API users.
  * - ID3v1, ID3v2, APE, FLAC, Xiph, iTunes-style MP4 and WMA tag formats.
- * - MP3, MPC, FLAC, MP4, ASF, AIFF, WAV, TrueAudio, WavPack, Ogg FLAC, Ogg Vorbis and Speex file formats.
+ * - MP3, MPC, FLAC, MP4, ASF, AIFF, WAV, TrueAudio, WavPack, Ogg FLAC, Ogg Vorbis, Speex and Opus file formats.
  * - Basic audio file properties such as length, sample rate, etc.
  * - Long term binary and source compatibility.
  * - Extensible design, notably the ability to add other formats or extend current formats as a library user.
  * - Full support for unicode and internationalized tags.
  * - Dual <a href="http://www.mozilla.org/MPL/MPL-1.1.html">MPL</a> and
  *   <a href="http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html">LGPL</a> licenses.
- * - No external toolkit dependancies.
+ * - No external toolkit dependencies.
  *
  * \section why Why TagLib?
  *

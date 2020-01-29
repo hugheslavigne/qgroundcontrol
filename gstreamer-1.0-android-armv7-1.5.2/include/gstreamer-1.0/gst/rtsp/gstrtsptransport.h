@@ -45,6 +45,7 @@
 
 #include <gst/gstconfig.h>
 #include <gst/rtsp/gstrtspdefs.h>
+#include <gst/rtsp/gstrtsp-enumtypes.h>
 
 G_BEGIN_DECLS
 
@@ -170,18 +171,29 @@ struct _GstRTSPTransport {
   gpointer _gst_reserved[GST_PADDING];
 };
 
+GST_RTSP_API
 GstRTSPResult      gst_rtsp_transport_new          (GstRTSPTransport **transport);
+
+GST_RTSP_API
 GstRTSPResult      gst_rtsp_transport_init         (GstRTSPTransport *transport);
 
+GST_RTSP_API
 GstRTSPResult      gst_rtsp_transport_parse        (const gchar *str, GstRTSPTransport *transport);
+
+GST_RTSP_API
 gchar*             gst_rtsp_transport_as_text      (GstRTSPTransport *transport);
 
+GST_RTSP_DEPRECATED_FOR(gst_rtsp_transport_get_media_type)
 GstRTSPResult      gst_rtsp_transport_get_mime     (GstRTSPTransMode trans, const gchar **mime);
+
+GST_RTSP_API
 GstRTSPResult      gst_rtsp_transport_get_manager  (GstRTSPTransMode trans, const gchar **manager, guint option);
 
+GST_RTSP_API
 GstRTSPResult      gst_rtsp_transport_get_media_type (GstRTSPTransport *transport,
                                                       const gchar **media_type);
 
+GST_RTSP_API
 GstRTSPResult      gst_rtsp_transport_free         (GstRTSPTransport *transport);
 
 G_END_DECLS

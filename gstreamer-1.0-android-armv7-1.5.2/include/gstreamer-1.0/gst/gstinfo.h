@@ -59,10 +59,10 @@ G_BEGIN_DECLS
  *  An example would be notifications about state changes or receiving/sending
  *  of events.
  * @GST_LEVEL_LOG: Log messages are messages that are very common but might be
- *  useful to know. As a rule of thumb a pipeline that is iterating as expected
- *  should never output anything else but LOG messages. Use this log level to
- *  log recurring information in chain functions and loop functions, for
- *  example.
+ *  useful to know. As a rule of thumb a pipeline that is running as expected
+ *  should never output anything else but LOG messages whilst processing data.
+ *  Use this log level to log recurring information in chain functions and
+ *  loop functions, for example.
  * @GST_LEVEL_TRACE: Tracing-related messages.
  *  Examples for this are referencing/dereferencing of objects.
  * @GST_LEVEL_MEMDUMP: memory dump messages are used to log (small) chunks of
@@ -151,7 +151,7 @@ typedef enum {
  * These are some terminal style flags you can use when creating your
  * debugging categories to make them stand out in debugging output.
  */
-typedef enum {
+typedef enum { /*< flags >*/
   /* colors */
   GST_DEBUG_FG_BLACK		= 0x0000,
   GST_DEBUG_FG_RED		= 0x0001,
@@ -174,6 +174,17 @@ typedef enum {
   GST_DEBUG_BOLD		= 0x0100,
   GST_DEBUG_UNDERLINE		= 0x0200
 } GstDebugColorFlags;
+
+/**
+ * GstStackTraceFlags:
+ * @GST_STACK_TRACE_SHOW_FULL: Try to retrieve as much information as
+ *                             possible when getting the stack trace
+ *
+ * Since: 1.12
+ */
+typedef enum {
+    GST_STACK_TRACE_SHOW_FULL = 1 << 0
+} GstStackTraceFlags;
 
 /**
  * GstDebugColorMode:
@@ -242,7 +253,7 @@ struct _GstDebugCategory {
  * GST_FUNCTION:
  *
  * This macro should evaluate to the name of the current function and be should
- * be defined when configuring your project, as it is compiler dependant. If it
+ * be defined when configuring your project, as it is compiler dependent. If it
  * is not defined, some default value is used. It is used to provide debugging
  * output with the function name of the message.
  *
@@ -250,27 +261,38 @@ struct _GstDebugCategory {
  * function signature in C++ code.
  */
 #ifndef GST_FUNCTION
-#if defined (__GNUC__) || (defined (_MSC_VER) && _MSC_VER >= 1300)
-#  define GST_FUNCTION     ((const char*) (__FUNCTION__))
-#elif defined (__STDC__) && defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
+#if defined (__STDC__) && defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
 #  define GST_FUNCTION     ((const char*) (__func__))
+#elif defined (__GNUC__) || (defined (_MSC_VER) && _MSC_VER >= 1300)
+#  define GST_FUNCTION     ((const char*) (__FUNCTION__))
 #else
 #  define GST_FUNCTION     ((const char*) ("???"))
 #endif
 #endif /* ifndef GST_FUNCTION */
 
 /**
- * GST_PTR_FORMAT:
+ * GST_PTR_FORMAT: (skip):
  *
- * printf format type used to debug GStreamer types.
+ * printf format type used to debug GStreamer types. You can use this in
+ * combination with GStreamer's debug logging system as well as the functions
+ * gst_info_vasprintf(), gst_info_strdup_vprintf() and gst_info_strdup_printf()
+ * to pretty-print the following types: #GstCaps, #GstStructure,
+ * #GstCapsFeatures, #GstTagList, #GstDateTime, #GstBuffer, #GstBufferList,
+ * #GstMessage, #GstEvent, #GstQuery, #GstContext, #GstPad, #GstObject. All
+ * #GObject types will be printed as typename plus pointer, and everything
+ * else will simply be printed as pointer address.
+ *
  * This can only be used on types whose size is >= sizeof(gpointer).
  */
 #define GST_PTR_FORMAT     "p\aA"
 
 /**
- * GST_SEGMENT_FORMAT:
+ * GST_SEGMENT_FORMAT: (skip):
  *
- * printf format type used to debug GStreamer segments.
+ * printf format type used to debug GStreamer segments. You can use this in
+ * combination with GStreamer's debug logging system as well as the functions
+ * gst_info_vasprintf(), gst_info_strdup_vprintf() and gst_info_strdup_printf()
+ * to pretty-print #GstSegment structures.
  * This can only be used on pointers to GstSegment structures.
  */
 #define GST_SEGMENT_FORMAT "p\aB"
@@ -301,6 +323,7 @@ typedef void (*GstLogFunction)  (GstDebugCategory * category,
                                  GstDebugMessage  * message,
                                  gpointer           user_data);
 
+GST_API
 void		    gst_debug_log            (GstDebugCategory * category,
                                           GstDebugLevel      level,
                                           const gchar      * file,
@@ -309,7 +332,7 @@ void		    gst_debug_log            (GstDebugCategory * category,
                                           GObject          * object,
                                           const gchar      * format,
                                           ...) G_GNUC_PRINTF (7, 8) G_GNUC_NO_INSTRUMENT;
-
+GST_API
 void            gst_debug_log_valist     (GstDebugCategory * category,
                                           GstDebugLevel      level,
                                           const gchar      * file,
@@ -320,14 +343,21 @@ void            gst_debug_log_valist     (GstDebugCategory * category,
                                           va_list            args) G_GNUC_NO_INSTRUMENT;
 
 /* do not use this function, use the GST_DEBUG_CATEGORY_INIT macro */
+
+GST_API
 GstDebugCategory *_gst_debug_category_new (const gchar * name,
                                            guint         color,
                                            const gchar * description);
+
 /* do not use this function, use the GST_DEBUG_CATEGORY_GET macro */
+
+GST_API
 GstDebugCategory *_gst_debug_get_category (const gchar *name);
 
 
 /* do not use this function, use the GST_CAT_MEMDUMP_* macros */
+
+GST_API
 void _gst_debug_dump_mem (GstDebugCategory * cat, const gchar * file,
     const gchar * func, gint line, GObject * obj, const gchar * msg,
     const guint8 * data, guint length);
@@ -339,14 +369,19 @@ void _gst_debug_dump_mem (GstDebugCategory * cat, const gchar * file,
 typedef	void (* GstDebugFuncPtr)	(void);
 
 /* do no use these functions, use the GST_DEBUG*_FUNCPTR macros */
+
+GST_API
 void	_gst_debug_register_funcptr	(GstDebugFuncPtr	func,
 					 const gchar *		ptrname);
+GST_API
 const gchar *
 	_gst_debug_nameof_funcptr	(GstDebugFuncPtr	func) G_GNUC_NO_INSTRUMENT;
 
 
+GST_API
 const gchar   * gst_debug_message_get    (GstDebugMessage  * message);
 
+GST_API
 void            gst_debug_log_default    (GstDebugCategory * category,
                                           GstDebugLevel      level,
                                           const gchar      * file,
@@ -355,62 +390,126 @@ void            gst_debug_log_default    (GstDebugCategory * category,
                                           GObject          * object,
                                           GstDebugMessage  * message,
                                           gpointer           user_data) G_GNUC_NO_INSTRUMENT;
-
+GST_API
 const gchar *   gst_debug_level_get_name (GstDebugLevel level);
 
+GST_API
 void            gst_debug_add_log_function            (GstLogFunction func,
                                                        gpointer       user_data,
                                                        GDestroyNotify notify);
-
+GST_API
 guint           gst_debug_remove_log_function         (GstLogFunction func);
+
+GST_API
 guint           gst_debug_remove_log_function_by_data (gpointer       data);
 
+GST_API
 void            gst_debug_set_active  (gboolean active);
+
+GST_API
 gboolean        gst_debug_is_active   (void);
 
+GST_API
 void            gst_debug_set_colored (gboolean colored);
+
+GST_API
 void            gst_debug_set_color_mode   (GstDebugColorMode mode);
+
+GST_API
 void            gst_debug_set_color_mode_from_string (const gchar * mode);
+
+GST_API
 gboolean        gst_debug_is_colored  (void);
+
+GST_API
 GstDebugColorMode gst_debug_get_color_mode (void);
 
+GST_API
 void            gst_debug_set_default_threshold      (GstDebugLevel level);
+
+GST_API
 GstDebugLevel   gst_debug_get_default_threshold      (void);
+
+GST_API
 void            gst_debug_set_threshold_for_name     (const gchar * name,
                                                       GstDebugLevel level);
+GST_API
 void            gst_debug_set_threshold_from_string  (const gchar * list, gboolean reset);
+
+GST_API
 void            gst_debug_unset_threshold_for_name   (const gchar * name);
 
 
+GST_API
 void            gst_debug_category_free              (GstDebugCategory *	category);
-void	            gst_debug_category_set_threshold     (GstDebugCategory *	category,
+
+GST_API
+void            gst_debug_category_set_threshold     (GstDebugCategory *	category,
                                                       GstDebugLevel		level);
+
+GST_API
 void            gst_debug_category_reset_threshold   (GstDebugCategory *	category);
+
+GST_API
 GstDebugLevel   gst_debug_category_get_threshold     (GstDebugCategory *	category);
+
+GST_API
 const gchar *   gst_debug_category_get_name          (GstDebugCategory *	category);
+
+GST_API
 guint           gst_debug_category_get_color         (GstDebugCategory *	category);
+
+GST_API
 const gchar *   gst_debug_category_get_description   (GstDebugCategory *	category);
+
+GST_API
 GSList *        gst_debug_get_all_categories	(void);
 
 
+GST_API
 gchar * gst_debug_construct_term_color (guint colorinfo);
+
+GST_API
 gint    gst_debug_construct_win_color  (guint colorinfo);
 
+GST_API
+gint    gst_info_vasprintf              (gchar ** result,
+                                         const gchar * format,
+                                         va_list args) G_GNUC_PRINTF (2, 0);
+GST_API
+gchar * gst_info_strdup_vprintf         (const gchar *format, va_list args) G_GNUC_PRINTF (1, 0);
+
+GST_API
+gchar * gst_info_strdup_printf          (const gchar *format, ...) G_GNUC_PRINTF (1, 2);
+
+GST_API
+void    gst_print                       (const gchar * format, ...) G_GNUC_PRINTF (1, 2);
+
+GST_API
+void    gst_println                     (const gchar * format, ...) G_GNUC_PRINTF (1, 2);
+
+GST_API
+void    gst_printerr                    (const gchar * format, ...) G_GNUC_PRINTF (1, 2);
+
+GST_API
+void    gst_printerrln                  (const gchar * format, ...) G_GNUC_PRINTF (1, 2);
 
 #ifndef GST_DISABLE_GST_DEBUG
 
+/* cast to void * avoids a warning with gcc 6
+ * see https://bugzilla.gnome.org/show_bug.cgi?id=764526 */
 #define gst_debug_add_log_function(func,data,notify) \
 G_STMT_START{                                        \
-  if (func == gst_debug_log_default) {               \
+  if ((func) == (void *) gst_debug_log_default) {    \
     gst_debug_add_log_function(NULL,data,notify);    \
   } else {                                           \
     gst_debug_add_log_function(func,data,notify);    \
   }                                                  \
 }G_STMT_END
 
-#define gst_debug_remove_log_function(func)   \
-    (func == gst_debug_log_default) ?         \
-        gst_debug_remove_log_function(NULL) : \
+#define gst_debug_remove_log_function(func)          \
+    ((func) == (void *) gst_debug_log_default) ?     \
+        gst_debug_remove_log_function(NULL) :        \
         gst_debug_remove_log_function(func)
 
 /**
@@ -449,30 +548,24 @@ G_STMT_START{                                        \
  * Initializes a new #GstDebugCategory with the given properties and set to
  * the default threshold.
  *
- * <note>
- * <para>
- * This macro expands to nothing if debugging is disabled.
- * </para>
- * <para>
- * When naming your category, please follow the following conventions to ensure
- * that the pattern matching for categories works as expected. It is not
- * earth-shattering if you don't follow these conventions, but it would be nice
- * for everyone.
- * </para>
- * <para>
- * If you define a category for a plugin or a feature of it, name the category
- * like the feature. So if you wanted to write a "filesrc" element, you would
- * name the category "filesrc". Use lowercase letters only.
- * If you define more than one category for the same element, append an
- * underscore and an identifier to your categories, like this: "filesrc_cache"
- * </para>
- * <para>
- * If you create a library or an application using debugging categories, use a
- * common prefix followed by an underscore for all your categories. GStreamer
- * uses the GST prefix so GStreamer categories look like "GST_STATES". Be sure
- * to include uppercase letters.
- * </para>
- * </note>
+ * > This macro expands to nothing if debugging is disabled.
+ * >
+ * > When naming your category, please follow the following conventions to ensure
+ * > that the pattern matching for categories works as expected. It is not
+ * > earth-shattering if you don't follow these conventions, but it would be nice
+ * > for everyone.
+ * >
+ * > If you define a category for a plugin or a feature of it, name the category
+ * > like the feature. So if you wanted to write a "filesrc" element, you would
+ * > name the category "filesrc". Use lowercase letters only.
+ * > If you define more than one category for the same element, append an
+ * > underscore and an identifier to your categories, like this: "filesrc_cache"
+ * >
+ * > If you create a library or an application using debugging categories, use a
+ * > common prefix followed by an underscore for all your categories. GStreamer
+ * > uses the GST prefix so GStreamer categories look like "GST_STATES". Be sure
+ * > to include uppercase letters.
+ *
  */
 #define GST_DEBUG_CATEGORY_INIT(cat,name,color,description) G_STMT_START{\
   if (cat == NULL)							\
@@ -488,7 +581,7 @@ G_STMT_START{                                        \
  * category is not found, but GST_CAT_DEFAULT is defined, that is assigned to
  * @cat. Otherwise @cat will be %NULL.
  *
- * |[
+ * |[<!-- language="C" -->
  * GST_DEBUG_CATEGORY_STATIC (gst_myplugin_debug);
  * #define GST_CAT_DEFAULT gst_myplugin_debug
  * GST_DEBUG_CATEGORY_STATIC (GST_CAT_PERFORMANCE);
@@ -515,13 +608,16 @@ G_STMT_START{                                        \
  *
  * Default gstreamer core debug log category. Please define your own.
  */
-GST_EXPORT GstDebugCategory *	GST_CAT_DEFAULT;
+
+GST_API GstDebugCategory *	GST_CAT_DEFAULT;
 /* this symbol may not be used */
-GST_EXPORT gboolean			_gst_debug_enabled;
+
+GST_API gboolean                 _gst_debug_enabled;
 
 /* the min debug level, used for quickly discarding debug
  * messages that fall under the threshold. */
-GST_EXPORT GstDebugLevel            _gst_debug_min;
+
+GST_API GstDebugLevel            _gst_debug_min;
 
 /**
  * GST_CAT_LEVEL_LOG:
@@ -533,10 +629,13 @@ GST_EXPORT GstDebugLevel            _gst_debug_min;
  * Outputs a debugging message. This is the most general macro for outputting
  * debugging messages. You will probably want to use one of the ones described
  * below.
+ *
+ * There is no need to finish the end of the debug message with a newline
+ * character, a newline character will be added automatically.
  */
 #ifdef G_HAVE_ISO_VARARGS
 #define GST_CAT_LEVEL_LOG(cat,level,object,...) G_STMT_START{		\
-  if (G_UNLIKELY (level <= GST_LEVEL_MAX && level <= _gst_debug_min)) {						\
+  if (G_UNLIKELY ((level) <= GST_LEVEL_MAX && (level) <= _gst_debug_min)) {						\
     gst_debug_log ((cat), (level), __FILE__, GST_FUNCTION, __LINE__,	\
         (GObject *) (object), __VA_ARGS__);				\
   }									\
@@ -544,7 +643,7 @@ GST_EXPORT GstDebugLevel            _gst_debug_min;
 #else /* G_HAVE_GNUC_VARARGS */
 #ifdef G_HAVE_GNUC_VARARGS
 #define GST_CAT_LEVEL_LOG(cat,level,object,args...) G_STMT_START{	\
-  if (G_UNLIKELY (level <= GST_LEVEL_MAX && level <= _gst_debug_min)) {						\
+  if (G_UNLIKELY ((level) <= GST_LEVEL_MAX && (level) <= _gst_debug_min)) {						\
     gst_debug_log ((cat), (level), __FILE__, GST_FUNCTION, __LINE__,	\
         (GObject *) (object), ##args );					\
   }									\
@@ -554,7 +653,7 @@ static inline void
 GST_CAT_LEVEL_LOG_valist (GstDebugCategory * cat,
     GstDebugLevel level, gpointer object, const char *format, va_list varargs)
 {
-  if (G_UNLIKELY (level <= GST_LEVEL_MAX && level <= _gst_debug_min)) {
+  if (G_UNLIKELY ((level) <= GST_LEVEL_MAX && (level) <= _gst_debug_min)) {
     gst_debug_log_valist (cat, level, "", "", 0, (GObject *) object, format,
         varargs);
   }
@@ -600,6 +699,9 @@ GST_CAT_LEVEL_LOG (GstDebugCategory * cat, GstDebugLevel level,
  * @...: printf-style message to output
  *
  * Output an error message belonging to the given object in the given category.
+ *
+ * There is no need to finish the end of the message string with a newline
+ * character, a newline character will be added automatically.
  */
 /**
  * GST_CAT_WARNING_OBJECT:
@@ -608,6 +710,9 @@ GST_CAT_LEVEL_LOG (GstDebugCategory * cat, GstDebugLevel level,
  * @...: printf-style message to output
  *
  * Output a warning message belonging to the given object in the given category.
+ *
+ * There is no need to finish the end of the message string with a newline
+ * character, a newline character will be added automatically.
  */
 /**
  * GST_CAT_INFO_OBJECT:
@@ -617,6 +722,9 @@ GST_CAT_LEVEL_LOG (GstDebugCategory * cat, GstDebugLevel level,
  *
  * Output an informational message belonging to the given object in the given
  * category.
+ *
+ * There is no need to finish the end of the message string with a newline
+ * character, a newline character will be added automatically.
  */
 /**
  * GST_CAT_DEBUG_OBJECT:
@@ -625,6 +733,9 @@ GST_CAT_LEVEL_LOG (GstDebugCategory * cat, GstDebugLevel level,
  * @...: printf-style message to output
  *
  * Output an debugging message belonging to the given object in the given category.
+ *
+ * There is no need to finish the end of the message string with a newline
+ * character, a newline character will be added automatically.
  */
 /**
  * GST_CAT_LOG_OBJECT:
@@ -633,6 +744,9 @@ GST_CAT_LEVEL_LOG (GstDebugCategory * cat, GstDebugLevel level,
  * @...: printf-style message to output
  *
  * Output an logging message belonging to the given object in the given category.
+ *
+ * There is no need to finish the end of the message string with a newline
+ * character, a newline character will be added automatically.
  */
 /**
  * GST_CAT_FIXME_OBJECT:
@@ -641,6 +755,9 @@ GST_CAT_LEVEL_LOG (GstDebugCategory * cat, GstDebugLevel level,
  * @...: printf-style message to output
  *
  * Output a fixme message belonging to the given object in the given category.
+ *
+ * There is no need to finish the end of the message string with a newline
+ * character, a newline character will be added automatically.
  */
 /**
  * GST_CAT_TRACE_OBJECT:
@@ -650,6 +767,9 @@ GST_CAT_LEVEL_LOG (GstDebugCategory * cat, GstDebugLevel level,
  *
  * Output a tracing message belonging to the given object in the given
  * category.
+ *
+ * There is no need to finish the end of the message string with a newline
+ * character, a newline character will be added automatically.
  */
 /**
  * GST_CAT_MEMDUMP_OBJECT:
@@ -661,6 +781,9 @@ GST_CAT_LEVEL_LOG (GstDebugCategory * cat, GstDebugLevel level,
  *
  * Output a hexdump of @data relating to the given object in the given
  * category.
+ *
+ * There is no need to finish the end of the message string with a newline
+ * character, a newline character will be added automatically.
  */
 
 
@@ -670,6 +793,9 @@ GST_CAT_LEVEL_LOG (GstDebugCategory * cat, GstDebugLevel level,
  * @...: printf-style message to output
  *
  * Output an error message in the given category.
+ *
+ * There is no need to finish the end of the message string with a newline
+ * character, a newline character will be added automatically.
  */
 /**
  * GST_CAT_WARNING:
@@ -677,6 +803,9 @@ GST_CAT_LEVEL_LOG (GstDebugCategory * cat, GstDebugLevel level,
  * @...: printf-style message to output
  *
  * Output an warning message in the given category.
+ *
+ * There is no need to finish the end of the message string with a newline
+ * character, a newline character will be added automatically.
  */
 /**
  * GST_CAT_INFO:
@@ -684,6 +813,9 @@ GST_CAT_LEVEL_LOG (GstDebugCategory * cat, GstDebugLevel level,
  * @...: printf-style message to output
  *
  * Output an informational message in the given category.
+ *
+ * There is no need to finish the end of the message string with a newline
+ * character, a newline character will be added automatically.
  */
 /**
  * GST_CAT_DEBUG:
@@ -691,6 +823,9 @@ GST_CAT_LEVEL_LOG (GstDebugCategory * cat, GstDebugLevel level,
  * @...: printf-style message to output
  *
  * Output an debugging message in the given category.
+ *
+ * There is no need to finish the end of the message string with a newline
+ * character, a newline character will be added automatically.
  */
 /**
  * GST_CAT_LOG:
@@ -698,6 +833,9 @@ GST_CAT_LEVEL_LOG (GstDebugCategory * cat, GstDebugLevel level,
  * @...: printf-style message to output
  *
  * Output an logging message in the given category.
+ *
+ * There is no need to finish the end of the message string with a newline
+ * character, a newline character will be added automatically.
  */
 /**
  * GST_CAT_FIXME:
@@ -705,6 +843,9 @@ GST_CAT_LEVEL_LOG (GstDebugCategory * cat, GstDebugLevel level,
  * @...: printf-style message to output
  *
  * Output an fixme message in the given category.
+ *
+ * There is no need to finish the end of the message string with a newline
+ * character, a newline character will be added automatically.
  */
 /**
  * GST_CAT_TRACE:
@@ -712,6 +853,9 @@ GST_CAT_LEVEL_LOG (GstDebugCategory * cat, GstDebugLevel level,
  * @...: printf-style message to output
  *
  * Output a tracing message in the given category.
+ *
+ * There is no need to finish the end of the message string with a newline
+ * character, a newline character will be added automatically.
  */
 /**
  * GST_CAT_MEMDUMP:
@@ -721,6 +865,9 @@ GST_CAT_LEVEL_LOG (GstDebugCategory * cat, GstDebugLevel level,
  * @length: length of the data to output
  *
  * Output a hexdump of @data in the given category.
+ *
+ * There is no need to finish the end of the message string with a newline
+ * character, a newline character will be added automatically.
  */
 
 
@@ -730,6 +877,9 @@ GST_CAT_LEVEL_LOG (GstDebugCategory * cat, GstDebugLevel level,
  * @...: printf-style message to output
  *
  * Output an error message belonging to the given object in the default category.
+ *
+ * There is no need to finish the end of the message string with a newline
+ * character, a newline character will be added automatically.
  */
 /**
  * GST_WARNING_OBJECT:
@@ -737,6 +887,9 @@ GST_CAT_LEVEL_LOG (GstDebugCategory * cat, GstDebugLevel level,
  * @...: printf-style message to output
  *
  * Output a warning message belonging to the given object in the default category.
+ *
+ * There is no need to finish the end of the message string with a newline
+ * character, a newline character will be added automatically.
  */
 /**
  * GST_INFO_OBJECT:
@@ -745,6 +898,9 @@ GST_CAT_LEVEL_LOG (GstDebugCategory * cat, GstDebugLevel level,
  *
  * Output an informational message belonging to the given object in the default
  * category.
+ *
+ * There is no need to finish the end of the message string with a newline
+ * character, a newline character will be added automatically.
  */
 /**
  * GST_DEBUG_OBJECT:
@@ -753,6 +909,9 @@ GST_CAT_LEVEL_LOG (GstDebugCategory * cat, GstDebugLevel level,
  *
  * Output a debugging message belonging to the given object in the default
  * category.
+ *
+ * There is no need to finish the end of the message string with a newline
+ * character, a newline character will be added automatically.
  */
 /**
  * GST_LOG_OBJECT:
@@ -760,6 +919,9 @@ GST_CAT_LEVEL_LOG (GstDebugCategory * cat, GstDebugLevel level,
  * @...: printf-style message to output
  *
  * Output a logging message belonging to the given object in the default category.
+ *
+ * There is no need to finish the end of the message string with a newline
+ * character, a newline character will be added automatically.
  */
 /**
  * GST_FIXME_OBJECT:
@@ -767,6 +929,9 @@ GST_CAT_LEVEL_LOG (GstDebugCategory * cat, GstDebugLevel level,
  * @...: printf-style message to output
  *
  * Output a fixme message belonging to the given object in the default category.
+ *
+ * There is no need to finish the end of the message string with a newline
+ * character, a newline character will be added automatically.
  */
 /**
  * GST_TRACE_OBJECT:
@@ -774,6 +939,9 @@ GST_CAT_LEVEL_LOG (GstDebugCategory * cat, GstDebugLevel level,
  * @...: printf-style message to output
  *
  * Output a tracing message belonging to the given object in the default category.
+ *
+ * There is no need to finish the end of the message string with a newline
+ * character, a newline character will be added automatically.
  */
 /**
  * GST_MEMDUMP_OBJECT:
@@ -783,6 +951,9 @@ GST_CAT_LEVEL_LOG (GstDebugCategory * cat, GstDebugLevel level,
  * @length: length of the data to output
  *
  * Output a logging message belonging to the given object in the default category.
+ *
+ * There is no need to finish the end of the message string with a newline
+ * character, a newline character will be added automatically.
  */
 
 
@@ -791,42 +962,63 @@ GST_CAT_LEVEL_LOG (GstDebugCategory * cat, GstDebugLevel level,
  * @...: printf-style message to output
  *
  * Output an error message in the default category.
+ *
+ * There is no need to finish the end of the message string with a newline
+ * character, a newline character will be added automatically.
  */
 /**
  * GST_WARNING:
  * @...: printf-style message to output
  *
  * Output a warning message in the default category.
+ *
+ * There is no need to finish the end of the message string with a newline
+ * character, a newline character will be added automatically.
  */
 /**
  * GST_INFO:
  * @...: printf-style message to output
  *
  * Output an informational message in the default category.
+ *
+ * There is no need to finish the end of the message string with a newline
+ * character, a newline character will be added automatically.
  */
 /**
  * GST_DEBUG:
  * @...: printf-style message to output
  *
  * Output a debugging message in the default category.
+ *
+ * There is no need to finish the end of the message string with a newline
+ * character, a newline character will be added automatically.
  */
 /**
  * GST_LOG:
  * @...: printf-style message to output
  *
  * Output a logging message in the default category.
+ *
+ * There is no need to finish the end of the message string with a newline
+ * character, a newline character will be added automatically.
  */
 /**
  * GST_FIXME:
  * @...: printf-style message to output
  *
  * Output a fixme message in the default category.
+ *
+ * There is no need to finish the end of the message string with a newline
+ * character, a newline character will be added automatically.
  */
 /**
  * GST_TRACE:
  * @...: printf-style message to output
  *
  * Output a tracing message in the default category.
+ *
+ * There is no need to finish the end of the message string with a newline
+ * character, a newline character will be added automatically.
  */
 /**
  * GST_MEMDUMP:
@@ -835,6 +1027,9 @@ GST_CAT_LEVEL_LOG (GstDebugCategory * cat, GstDebugLevel level,
  * @length: length of the data to output
  *
  * Output a hexdump of @data.
+ *
+ * There is no need to finish the end of the message string with a newline
+ * character, a newline character will be added automatically.
  */
 
 #ifdef G_HAVE_ISO_VARARGS
@@ -1545,7 +1740,18 @@ GST_TRACE (const char *format, ...)
 #endif /* GST_DISABLE_GST_DEBUG */
 
 
+GST_API
 void gst_debug_print_stack_trace (void);
+
+GST_API
+gchar * gst_debug_get_stack_trace (GstStackTraceFlags flags);
+
+GST_API
+void                  gst_debug_add_ring_buffer_logger      (guint max_size_per_thread, guint thread_timeout);
+GST_API
+void                  gst_debug_remove_ring_buffer_logger   (void);
+GST_API
+gchar **              gst_debug_ring_buffer_logger_get_logs (void);
 
 G_END_DECLS
 

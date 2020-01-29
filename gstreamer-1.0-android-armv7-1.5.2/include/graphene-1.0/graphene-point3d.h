@@ -1,6 +1,6 @@
 /* graphene-point3d.h: Point in 3D space
  *
- * Copyright © 2014  Emmanuele Bassi
+ * Copyright 2014  Emmanuele Bassi
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,15 +34,15 @@ GRAPHENE_BEGIN_DECLS
 
 /**
  * GRAPHENE_POINT3D_INIT:
- * @x: the X coordinate
- * @y: the Y coordinate
- * @z: the Z coordinate
+ * @_x: the X coordinate
+ * @_y: the Y coordinate
+ * @_z: the Z coordinate
  *
  * Initializes a #graphene_point3d_t to the given coordinates when declaring it.
  *
  * Since: 1.0
  */
-#define GRAPHENE_POINT3D_INIT(x,y,z)    { x, y, z }
+#define GRAPHENE_POINT3D_INIT(_x,_y,_z) (graphene_point3d_t) { .x = (_x), .y = (_y), .z = (_z) }
 
 /**
  * GRAPHENE_POINT3D_INIT_ZERO:
@@ -114,11 +114,22 @@ float                           graphene_point3d_length                 (const g
 GRAPHENE_AVAILABLE_IN_1_0
 void                            graphene_point3d_normalize              (const graphene_point3d_t *p,
                                                                          graphene_point3d_t       *res);
+GRAPHENE_AVAILABLE_IN_1_4
+float                           graphene_point3d_distance               (const graphene_point3d_t *a,
+                                                                         const graphene_point3d_t *b,
+                                                                         graphene_vec3_t          *delta);
 
 GRAPHENE_AVAILABLE_IN_1_0
 void                            graphene_point3d_interpolate            (const graphene_point3d_t *a,
                                                                          const graphene_point3d_t *b,
                                                                          double                    factor,
+                                                                         graphene_point3d_t       *res);
+
+GRAPHENE_AVAILABLE_IN_1_4
+void                            graphene_point3d_normalize_viewport     (const graphene_point3d_t *p,
+                                                                         const graphene_rect_t    *viewport,
+                                                                         float                     z_near,
+                                                                         float                     z_far,
                                                                          graphene_point3d_t       *res);
 
 GRAPHENE_AVAILABLE_IN_1_0

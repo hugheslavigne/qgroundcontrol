@@ -1,6 +1,6 @@
 /* graphene-rect.h: Rectangular type
  *
- * Copyright © 2014  Emmanuele Bassi
+ * Copyright 2014  Emmanuele Bassi
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,22 +30,24 @@
 
 #include "graphene-types.h"
 #include "graphene-point.h"
+#include "graphene-size.h"
+#include "graphene-vec2.h"
 
 GRAPHENE_BEGIN_DECLS
 
 /**
  * GRAPHENE_RECT_INIT:
- * @x: the X coordinate of the origin
- * @y: the Y coordinate of the origin
- * @w: the width
- * @h: the height
+ * @_x: the X coordinate of the origin
+ * @_y: the Y coordinate of the origin
+ * @_w: the width
+ * @_h: the height
  *
  * Initializes a #graphene_rect_t when declaring it.
  *
  * Since: 1.0
  */
-#define GRAPHENE_RECT_INIT(x,y,w,h) \
-  { { x, y }, { w, h } }
+#define GRAPHENE_RECT_INIT(_x,_y,_w,_h) \
+  (graphene_rect_t) { .origin = { .x = (_x), .y = (_y) }, .size = { .width = (_w), .height = (_h) } }
 
 /**
  * graphene_rect_t:
@@ -92,6 +94,9 @@ bool                    graphene_rect_equal             (const graphene_rect_t *
                                                          const graphene_rect_t *b);
 GRAPHENE_AVAILABLE_IN_1_0
 graphene_rect_t *       graphene_rect_normalize         (graphene_rect_t       *r);
+GRAPHENE_AVAILABLE_IN_1_4
+void                    graphene_rect_normalize_r       (const graphene_rect_t *r,
+                                                         graphene_rect_t       *res);
 GRAPHENE_AVAILABLE_IN_1_0
 void                    graphene_rect_get_center        (const graphene_rect_t *r,
                                                          graphene_point_t      *p);
@@ -107,6 +112,9 @@ void                    graphene_rect_get_bottom_right  (const graphene_rect_t *
 GRAPHENE_AVAILABLE_IN_1_0
 void                    graphene_rect_get_bottom_left   (const graphene_rect_t *r,
                                                          graphene_point_t      *p);
+GRAPHENE_AVAILABLE_IN_1_4
+void                    graphene_rect_get_vertices      (const graphene_rect_t *r,
+                                                         graphene_vec2_t        vertices[]);
 GRAPHENE_AVAILABLE_IN_1_0
 float                   graphene_rect_get_x             (const graphene_rect_t *r);
 GRAPHENE_AVAILABLE_IN_1_0
@@ -134,17 +142,38 @@ GRAPHENE_AVAILABLE_IN_1_0
 graphene_rect_t *       graphene_rect_offset            (graphene_rect_t        *r,
                                                          float                   d_x,
                                                          float                   d_y);
+GRAPHENE_AVAILABLE_IN_1_4
+void                    graphene_rect_offset_r          (const graphene_rect_t  *r,
+                                                         float                   d_x,
+                                                         float                   d_y,
+                                                         graphene_rect_t        *res);
 GRAPHENE_AVAILABLE_IN_1_0
 graphene_rect_t *       graphene_rect_inset             (graphene_rect_t        *r,
                                                          float                   d_x,
                                                          float                   d_y);
-GRAPHENE_AVAILABLE_IN_1_0
+GRAPHENE_AVAILABLE_IN_1_4
+void                    graphene_rect_inset_r           (const graphene_rect_t  *r,
+                                                         float                   d_x,
+                                                         float                   d_y,
+                                                         graphene_rect_t        *res);
+GRAPHENE_DEPRECATED_IN_1_4_FOR (graphene_rect_round)
 graphene_rect_t *       graphene_rect_round_to_pixel    (graphene_rect_t        *r);
+GRAPHENE_AVAILABLE_IN_1_4
+void                    graphene_rect_round             (const graphene_rect_t  *r,
+                                                         graphene_rect_t        *res);
 GRAPHENE_AVAILABLE_IN_1_0
 void                    graphene_rect_interpolate       (const graphene_rect_t  *a,
                                                          const graphene_rect_t  *b,
                                                          double                  factor,
                                                          graphene_rect_t        *res);
+
+GRAPHENE_AVAILABLE_IN_1_4
+void                    graphene_rect_expand            (const graphene_rect_t  *r,
+                                                         const graphene_point_t *p,
+                                                         graphene_rect_t        *res);
+
+GRAPHENE_AVAILABLE_IN_1_4
+const graphene_rect_t * graphene_rect_zero              (void);
 
 GRAPHENE_END_DECLS
 

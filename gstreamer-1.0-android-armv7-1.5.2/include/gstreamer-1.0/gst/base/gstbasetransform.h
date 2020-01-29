@@ -22,6 +22,7 @@
 #define __GST_BASE_TRANSFORM_H__
 
 #include <gst/gst.h>
+#include <gst/base/base-prelude.h>
 
 G_BEGIN_DECLS
 
@@ -179,9 +180,9 @@ struct _GstBaseTransform {
  *                 The default implementation will copy the flags, timestamps and
  *                 offsets of the buffer.
  * @transform_meta: Optional. Transform the metadata on the input buffer to the
- *                  output buffer. By default this method is %NULL and no
- *                  metadata is copied. subclasses can implement this method and
- *                  return %TRUE if the metadata is to be copied.
+ *                  output buffer. By default this method copies all meta without
+ *                  tags. subclasses can implement this method and return %TRUE if
+ *                  the metadata is to be copied.
  * @before_transform: Optional.
  *                    This method is called right before the base class will
  *                    start processing. Dynamic properties or other delayed
@@ -198,7 +199,7 @@ struct _GstBaseTransform {
  *                  member variable. If the buffer is dropped due to QoS, it returns
  *                  GST_BASE_TRANSFORM_FLOW_DROPPED. If this input buffer is not
  *                  contiguous with any previous input buffer, then @is_discont
- *                  is set to #TRUE. (Since 1.6)
+ *                  is set to %TRUE. (Since: 1.6)
  * @generate_output: Called after each new input buffer is submitted repeatedly
  *                   until it either generates an error or fails to generate an output
  *                   buffer. The default implementation takes the contents of the
@@ -207,8 +208,8 @@ struct _GstBaseTransform {
  *                   calls either @transform or @transform_ip. Elements that don't
  *                   do 1-to-1 transformations on input to output buffers can either
  *                   return GST_BASE_TRANSFORM_FLOW_DROPPED or simply not generate
- *                   an output buffer until they are ready to do so. (Since 1.6)
- *                   
+ *                   an output buffer until they are ready to do so. (Since: 1.6)
+ *
  * Subclasses can override any of the available virtual methods or not, as
  * needed. At minimum either @transform or @transform_ip need to be overridden.
  * If the element can overwrite the input data with the results (data is of the
@@ -244,12 +245,19 @@ struct _GstBaseTransformClass {
   gboolean      (*propose_allocation) (GstBaseTransform *trans, GstQuery *decide_query,
                                        GstQuery *query);
 
-  /* transform size */
+  /**
+   * GstBaseTransformClass::transform_size:
+   * @othersize: (out):
+   */
   gboolean      (*transform_size) (GstBaseTransform *trans,
                                    GstPadDirection direction,
                                    GstCaps *caps, gsize size,
                                    GstCaps *othercaps, gsize *othersize);
 
+  /**
+   * GstBaseTransformClass::get_unit_size:
+   * @size: (out):
+   */
   gboolean      (*get_unit_size)  (GstBaseTransform *trans, GstCaps *caps,
                                    gsize *size);
 
@@ -261,6 +269,10 @@ struct _GstBaseTransformClass {
   gboolean      (*sink_event)   (GstBaseTransform *trans, GstEvent *event);
   gboolean      (*src_event)    (GstBaseTransform *trans, GstEvent *event);
 
+  /**
+   * GstBaseTransformClass::prepare_output_buffer:
+   * @outbuf: (out):
+   */
   GstFlowReturn (*prepare_output_buffer) (GstBaseTransform * trans,
                                           GstBuffer *input, GstBuffer **outbuf);
 
@@ -278,45 +290,70 @@ struct _GstBaseTransformClass {
   GstFlowReturn (*transform_ip) (GstBaseTransform *trans, GstBuffer *buf);
 
   GstFlowReturn (*submit_input_buffer) (GstBaseTransform *trans, gboolean is_discont, GstBuffer *input);
+
+  /**
+   * GstBaseTransformClass::generate_output:
+   * @outbuf: (out):
+   */
   GstFlowReturn (*generate_output) (GstBaseTransform *trans, GstBuffer **outbuf);
 
   /*< private >*/
   gpointer       _gst_reserved[GST_PADDING_LARGE - 2];
 };
 
+GST_BASE_API
 GType           gst_base_transform_get_type         (void);
 
+GST_BASE_API
 void		gst_base_transform_set_passthrough  (GstBaseTransform *trans,
 	                                             gboolean passthrough);
+GST_BASE_API
 gboolean	gst_base_transform_is_passthrough   (GstBaseTransform *trans);
 
+GST_BASE_API
 void		gst_base_transform_set_in_place     (GstBaseTransform *trans,
 	                                             gboolean in_place);
+GST_BASE_API
 gboolean	gst_base_transform_is_in_place      (GstBaseTransform *trans);
 
+GST_BASE_API
 void		gst_base_transform_update_qos       (GstBaseTransform *trans,
 						     gdouble proportion,
 						     GstClockTimeDiff diff,
 						     GstClockTime timestamp);
+GST_BASE_API
 void		gst_base_transform_set_qos_enabled  (GstBaseTransform *trans,
 		                                     gboolean enabled);
+GST_BASE_API
 gboolean	gst_base_transform_is_qos_enabled   (GstBaseTransform *trans);
 
+GST_BASE_API
 void            gst_base_transform_set_gap_aware    (GstBaseTransform *trans,
                                                      gboolean gap_aware);
-
+GST_BASE_API
 void            gst_base_transform_set_prefer_passthrough (GstBaseTransform *trans,
                                                            gboolean prefer_passthrough);
-
+GST_BASE_API
 GstBufferPool * gst_base_transform_get_buffer_pool  (GstBaseTransform *trans);
+
+GST_BASE_API
 void            gst_base_transform_get_allocator    (GstBaseTransform *trans,
                                                      GstAllocator **allocator,
                                                      GstAllocationParams *params);
-
+GST_BASE_API
 void		gst_base_transform_reconfigure_sink (GstBaseTransform *trans);
+
+GST_BASE_API
 void		gst_base_transform_reconfigure_src  (GstBaseTransform *trans);
+
+GST_BASE_API
 gboolean gst_base_transform_update_src_caps (GstBaseTransform *trans,
                                              GstCaps *updated_caps);
+
+#ifdef G_DEFINE_AUTOPTR_CLEANUP_FUNC
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(GstBaseTransform, gst_object_unref)
+#endif
+
 G_END_DECLS
 
 #endif /* __GST_BASE_TRANSFORM_H__ */

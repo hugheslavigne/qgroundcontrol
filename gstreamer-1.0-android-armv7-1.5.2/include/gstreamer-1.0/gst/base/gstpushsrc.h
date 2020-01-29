@@ -58,9 +58,9 @@ struct _GstPushSrc {
  *          size this buffer should be. Other then that, refer to
  *          #GstBaseSrc<!-- -->.create() for more details. If this method is
  *          not implemented, @alloc followed by @fill will be called.
- * @alloc: Ask the subclass to allocated a buffer. The subclass decides which
+ * @alloc: Ask the subclass to allocate a buffer. The subclass decides which
  *         size this buffer should be. The default implementation will create
- *         a new buffer from the negotiate allcoator.
+ *         a new buffer from the negotiated allocator.
  * @fill: Ask the subclass to fill the buffer with data.
  *
  * Subclasses can override any of the available virtual methods or not, as
@@ -82,7 +82,12 @@ struct _GstPushSrcClass {
   gpointer _gst_reserved[GST_PADDING];
 };
 
-GType gst_push_src_get_type(void);
+GST_BASE_API
+GType gst_push_src_get_type (void);
+
+#ifdef G_DEFINE_AUTOPTR_CLEANUP_FUNC
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(GstPushSrc, gst_object_unref)
+#endif
 
 G_END_DECLS
 

@@ -23,9 +23,11 @@
 #define __GST_MIKEY_H__
 
 #include <gst/gst.h>
+#include <gst/sdp/sdp-prelude.h>
 
 G_BEGIN_DECLS
 
+GST_SDP_API
 GType gst_mikey_message_get_type(void);
 #define GST_TYPE_MIKEY_MESSAGE (gst_mikey_message_get_type())
 
@@ -117,7 +119,7 @@ typedef enum
 
 /**
  * GstMIKEYMapType:
- * @GST_MIKEY_MAP_TYPE_SRTP:
+ * @GST_MIKEY_MAP_TYPE_SRTP: SRTP
  *
  * Specifies the method of uniquely mapping Crypto Sessions to the security
  * protocol sessions.
@@ -143,6 +145,7 @@ typedef struct {
 
 typedef struct _GstMIKEYPayload GstMIKEYPayload;
 
+GST_SDP_API
 GType gst_mikey_payload_get_type(void);
 #define GST_TYPE_MIKEY_PAYLOAD (gst_mikey_payload_get_type())
 
@@ -162,6 +165,7 @@ struct _GstMIKEYPayload {
   guint len;
 };
 
+GST_SDP_API
 GstMIKEYPayload *   gst_mikey_payload_new      (GstMIKEYPayloadType type);
 
 /**
@@ -174,10 +178,6 @@ GstMIKEYPayload *   gst_mikey_payload_new      (GstMIKEYPayloadType type);
  *
  * Since: 1.4
  */
-#ifdef _FOOL_GTK_DOC_
-G_INLINE_FUNC GstMIKEYPayload * gst_mikey_payload_ref (GstMIKEYPayload * payload);
-#endif
-
 static inline GstMIKEYPayload *
 gst_mikey_payload_ref (GstMIKEYPayload * payload)
 {
@@ -192,10 +192,6 @@ gst_mikey_payload_ref (GstMIKEYPayload * payload)
  *
  * Since: 1.4
  */
-#ifdef _FOOL_GTK_DOC_
-G_INLINE_FUNC void gst_mikey_payload_unref (GstMIKEYPayload * payload);
-#endif
-
 static inline void
 gst_mikey_payload_unref (GstMIKEYPayload * payload)
 {
@@ -212,10 +208,6 @@ gst_mikey_payload_unref (GstMIKEYPayload * payload)
  *
  * Since: 1.4
  */
-#ifdef _FOOL_GTK_DOC_
-G_INLINE_FUNC GstMIKEYPayload * gst_mikey_payload_copy (const GstMIKEYPayload * payload);
-#endif
-
 static inline GstMIKEYPayload *
 gst_mikey_payload_copy (const GstMIKEYPayload * payload)
 {
@@ -227,6 +219,7 @@ gst_mikey_payload_copy (const GstMIKEYPayload * payload)
  * @GST_MIKEY_ENC_NULL: no encryption
  * @GST_MIKEY_ENC_AES_CM_128: AES-CM using a 128-bit key
  * @GST_MIKEY_ENC_AES_KW_128: AES Key Wrap using a 128-bit key
+ * @GST_MIKEY_ENC_AES_GCM_128: AES-GCM using a 128-bit key (Since: 1.16)
  *
  * The encryption algorithm used to encrypt the Encr data field
  */
@@ -234,7 +227,8 @@ typedef enum
 {
   GST_MIKEY_ENC_NULL        = 0,
   GST_MIKEY_ENC_AES_CM_128  = 1,
-  GST_MIKEY_ENC_AES_KW_128  = 2
+  GST_MIKEY_ENC_AES_KW_128  = 2,
+  GST_MIKEY_ENC_AES_GCM_128 = 6
 } GstMIKEYEncAlg;
 
 /**
@@ -267,12 +261,21 @@ typedef struct {
   GArray *subpayloads;
 } GstMIKEYPayloadKEMAC;
 
+GST_SDP_API
 gboolean                gst_mikey_payload_kemac_set        (GstMIKEYPayload *payload,
                                                             GstMIKEYEncAlg enc_alg,
                                                             GstMIKEYMacAlg mac_alg);
+
+GST_SDP_API
 guint                   gst_mikey_payload_kemac_get_n_sub  (const GstMIKEYPayload *payload);
+
+GST_SDP_API
 const GstMIKEYPayload * gst_mikey_payload_kemac_get_sub    (const GstMIKEYPayload *payload, guint idx);
+
+GST_SDP_API
 gboolean                gst_mikey_payload_kemac_remove_sub (GstMIKEYPayload *payload, guint idx);
+
+GST_SDP_API
 gboolean                gst_mikey_payload_kemac_add_sub    (GstMIKEYPayload *payload,
                                                             GstMIKEYPayload *newpay);
 
@@ -312,6 +315,7 @@ typedef struct {
   guint8           *data;
 } GstMIKEYPayloadPKE;
 
+GST_SDP_API
 gboolean               gst_mikey_payload_pke_set     (GstMIKEYPayload *payload,
                                                       GstMIKEYCacheType C,
                                                       guint16 data_len, const guint8 *data);
@@ -347,6 +351,7 @@ typedef struct {
   guint8         *ts_value;
 } GstMIKEYPayloadT;
 
+GST_SDP_API
 gboolean   gst_mikey_payload_t_set   (GstMIKEYPayload *payload,
                                       GstMIKEYTSType type, const guint8 *ts_value);
 
@@ -366,7 +371,7 @@ typedef struct {
 
 /**
  * GstMIKEYSecProto:
- * @GST_MIKEY_SEC_PROTO_SRTP:
+ * @GST_MIKEY_SEC_PROTO_SRTP: SRTP
  *
  * Specifies the security protocol
  */
@@ -390,6 +395,7 @@ typedef enum
  * @GST_MIKEY_SP_SRTP_SRTP_AUTH: SRTP authentication off/on, 0 if off, 1 if on
  * @GST_MIKEY_SP_SRTP_AUTH_TAG_LEN: Authentication tag length
  * @GST_MIKEY_SP_SRTP_SRTP_PREFIX_LEN: SRTP prefix length
+ * @GST_MIKEY_SP_SRTP_AEAD_AUTH_TAG_LEN: AEAD authentication tag length (Since: 1.16)
  *
  * This policy specifies the parameters for SRTP and SRTCP
  */
@@ -407,7 +413,8 @@ typedef enum
   GST_MIKEY_SP_SRTP_FEC_ORDER       =    9,
   GST_MIKEY_SP_SRTP_SRTP_AUTH       =   10,
   GST_MIKEY_SP_SRTP_AUTH_TAG_LEN    =   11,
-  GST_MIKEY_SP_SRTP_SRTP_PREFIX_LEN =   12
+  GST_MIKEY_SP_SRTP_SRTP_PREFIX_LEN =   12,
+  GST_MIKEY_SP_SRTP_AEAD_AUTH_TAG_LEN = 20
 } GstMIKEYSecSRTP;
 
 /**
@@ -415,7 +422,7 @@ typedef enum
  * @pt: the payload header
  * @policy: the policy number
  * @proto: the security protocol
- * @params: array of #GstMIKEYPayloadPSParam
+ * @params: array of #GstMIKEYPayloadSPParam
  *
  * The Security Policy payload defines a set of policies that apply to a
  * specific security protocol
@@ -428,12 +435,20 @@ typedef struct {
   GArray *params;
 } GstMIKEYPayloadSP;
 
+GST_SDP_API
 gboolean            gst_mikey_payload_sp_set          (GstMIKEYPayload *payload,
                                                        guint policy, GstMIKEYSecProto proto);
+GST_SDP_API
 guint               gst_mikey_payload_sp_get_n_params (const GstMIKEYPayload *payload);
+
+GST_SDP_API
 const GstMIKEYPayloadSPParam *
                     gst_mikey_payload_sp_get_param    (const GstMIKEYPayload *payload, guint idx);
+
+GST_SDP_API
 gboolean            gst_mikey_payload_sp_remove_param (GstMIKEYPayload *payload, guint idx);
+
+GST_SDP_API
 gboolean            gst_mikey_payload_sp_add_param    (GstMIKEYPayload *payload,
                                                        guint8 type, guint8 len, const guint8 *val);
 
@@ -452,6 +467,7 @@ typedef struct {
   guint8 *rand;
 } GstMIKEYPayloadRAND;
 
+GST_SDP_API
 gboolean   gst_mikey_payload_rand_set     (GstMIKEYPayload *payload,
                                            guint8 len, const guint8 *rand);
 
@@ -486,9 +502,9 @@ typedef enum
 /**
  * GstMIKEYPayloadKeyData:
  * @pt: the payload header
- * @type: the #GstMIKEYKeyDataType of @key_data
+ * @key_type: the #GstMIKEYKeyDataType of @key_data
  * @key_len: length of @key_data
- * @key_dat: the key data
+ * @key_data: the key data
  * @salt_len: the length of @salt_data, can be 0
  * @salt_data: salt data
  * @kv_type: the Key Validity type
@@ -511,13 +527,20 @@ typedef struct {
   guint8  *kv_data[2];
 } GstMIKEYPayloadKeyData;
 
+GST_SDP_API
 gboolean   gst_mikey_payload_key_data_set_key      (GstMIKEYPayload *payload,
                                                     GstMIKEYKeyDataType key_type,
                                                     guint16 key_len, const guint8 *key_data);
+
+GST_SDP_API
 gboolean   gst_mikey_payload_key_data_set_salt     (GstMIKEYPayload *payload,
                                                     guint16 salt_len, const guint8 *salt_data);
+
+GST_SDP_API
 gboolean   gst_mikey_payload_key_data_set_spi      (GstMIKEYPayload *payload,
                                                     guint8 spi_len, const guint8 *spi_data);
+
+GST_SDP_API
 gboolean   gst_mikey_payload_key_data_set_interval (GstMIKEYPayload *payload,
                                                     guint8 vf_len, const guint8 *vf_data,
                                                     guint8 vt_len, const guint8 *vt_data);
@@ -552,13 +575,30 @@ struct _GstMIKEYMessage
 };
 
 
+GST_SDP_API
 GstMIKEYMessage *           gst_mikey_message_new               (void);
+
+GST_SDP_API
 GstMIKEYMessage *           gst_mikey_message_new_from_data     (gconstpointer data, gsize size,
                                                                  GstMIKEYDecryptInfo *info, GError **error);
+
+GST_SDP_API
 GstMIKEYMessage *           gst_mikey_message_new_from_bytes    (GBytes *bytes, GstMIKEYDecryptInfo *info,
                                                                  GError **error);
+
+GST_SDP_API
 GBytes *                    gst_mikey_message_to_bytes          (GstMIKEYMessage *msg, GstMIKEYEncryptInfo *info,
                                                                  GError **error);
+
+GST_SDP_API
+GstMIKEYMessage *           gst_mikey_message_new_from_caps     (GstCaps *caps);
+
+GST_SDP_API
+gboolean                    gst_mikey_message_to_caps           (const GstMIKEYMessage *msg, GstCaps *caps);
+
+GST_SDP_API
+gchar *                     gst_mikey_message_base64_encode     (GstMIKEYMessage* msg);
+
 /**
  * gst_mikey_message_ref:
  * @message: The message to refcount
@@ -569,10 +609,6 @@ GBytes *                    gst_mikey_message_to_bytes          (GstMIKEYMessage
  *
  * Since: 1.4
  */
-#ifdef _FOOL_GTK_DOC_
-G_INLINE_FUNC GstMIKEYMessage * gst_mikey_message_ref (GstMIKEYMessage * message);
-#endif
-
 static inline GstMIKEYMessage *
 gst_mikey_message_ref (GstMIKEYMessage * message)
 {
@@ -587,10 +623,6 @@ gst_mikey_message_ref (GstMIKEYMessage * message)
  *
  * Since: 1.4
  */
-#ifdef _FOOL_GTK_DOC_
-G_INLINE_FUNC void gst_mikey_message_unref (GstMIKEYMessage * message);
-#endif
-
 static inline void
 gst_mikey_message_unref (GstMIKEYMessage * message)
 {
@@ -607,10 +639,6 @@ gst_mikey_message_unref (GstMIKEYMessage * message)
  *
  * Since: 1.4
  */
-#ifdef _FOOL_GTK_DOC_
-G_INLINE_FUNC GstMIKEYMessage * gst_mikey_message_copy (const GstMIKEYMessage * message);
-#endif
-
 static inline GstMIKEYMessage *
 gst_mikey_message_copy (const GstMIKEYMessage * message)
 {
@@ -618,38 +646,67 @@ gst_mikey_message_copy (const GstMIKEYMessage * message)
 }
 
 
+GST_SDP_API
 gboolean                    gst_mikey_message_set_info          (GstMIKEYMessage *msg,
                                                                  guint8 version, GstMIKEYType type, gboolean V,
                                                                  GstMIKEYPRFFunc prf_func, guint32 CSB_id,
                                                                  GstMIKEYMapType map_type);
+
+GST_SDP_API
 guint                       gst_mikey_message_get_n_cs          (const GstMIKEYMessage *msg);
 
 /* SRTP crypto sessions */
+
+GST_SDP_API
 const GstMIKEYMapSRTP *     gst_mikey_message_get_cs_srtp       (const GstMIKEYMessage *msg, guint idx);
+
+GST_SDP_API
 gboolean                    gst_mikey_message_insert_cs_srtp    (GstMIKEYMessage *msg, gint idx,
                                                                  const GstMIKEYMapSRTP *map);
+
+GST_SDP_API
 gboolean                    gst_mikey_message_replace_cs_srtp   (GstMIKEYMessage *msg, gint idx,
                                                                  const GstMIKEYMapSRTP *map);
+
+GST_SDP_API
 gboolean                    gst_mikey_message_remove_cs_srtp    (GstMIKEYMessage *msg, gint idx);
+
+GST_SDP_API
 gboolean                    gst_mikey_message_add_cs_srtp       (GstMIKEYMessage *msg,
                                                                  guint8 policy, guint32 ssrc, guint32 roc);
 
 /* adding/retrieving payloads */
+
+GST_SDP_API
 guint                       gst_mikey_message_get_n_payloads    (const GstMIKEYMessage *msg);
+
+GST_SDP_API
 const GstMIKEYPayload *     gst_mikey_message_get_payload       (const GstMIKEYMessage *msg, guint idx);
+
+GST_SDP_API
 const GstMIKEYPayload *     gst_mikey_message_find_payload      (const GstMIKEYMessage *msg,
                                                                  GstMIKEYPayloadType type, guint nth);
+
+GST_SDP_API
 gboolean                    gst_mikey_message_remove_payload    (GstMIKEYMessage *msg, guint idx);
+
+GST_SDP_API
 gboolean                    gst_mikey_message_insert_payload    (GstMIKEYMessage *msg, guint idx,
                                                                  GstMIKEYPayload *payload);
+
+GST_SDP_API
 gboolean                    gst_mikey_message_add_payload       (GstMIKEYMessage *msg,
                                                                  GstMIKEYPayload *payload);
+
+GST_SDP_API
 gboolean                    gst_mikey_message_replace_payload   (GstMIKEYMessage *msg, guint idx,
                                                                  GstMIKEYPayload *payload);
 
 
 /* Key data transport payload (KEMAC) */
 /* Envelope data payload (PKE) */
+
+GST_SDP_API
 gboolean                    gst_mikey_message_add_pke           (GstMIKEYMessage *msg,
                                                                  GstMIKEYCacheType C,
                                                                  guint16 data_len, const guint8 *data);
@@ -657,8 +714,12 @@ gboolean                    gst_mikey_message_add_pke           (GstMIKEYMessage
 /* Signature payload (SIGN) */
 
 /* Timestamp payload (T) */
+
+GST_SDP_API
 gboolean                    gst_mikey_message_add_t             (GstMIKEYMessage *msg,
                                                                  GstMIKEYTSType type, const guint8 *ts_value);
+
+GST_SDP_API
 gboolean                    gst_mikey_message_add_t_now_ntp_utc (GstMIKEYMessage *msg);
 /* ID payload (ID) */
 /* Certificate Payload (CERT) */
@@ -666,8 +727,12 @@ gboolean                    gst_mikey_message_add_t_now_ntp_utc (GstMIKEYMessage
 /* Ver msg payload (V) */
 /* Security Policy payload (SP)*/
 /* RAND payload (RAND) */
+
+GST_SDP_API
 gboolean                    gst_mikey_message_add_rand          (GstMIKEYMessage *msg,
                                                                  guint8 len, const guint8 *rand);
+
+GST_SDP_API
 gboolean                    gst_mikey_message_add_rand_len      (GstMIKEYMessage *msg, guint8 len);
 
 /* Error payload (ERR) */
@@ -675,7 +740,14 @@ gboolean                    gst_mikey_message_add_rand_len      (GstMIKEYMessage
 /* General Extension Payload */
 
 
+#ifdef G_DEFINE_AUTOPTR_CLEANUP_FUNC
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(GstMIKEYMessage, gst_mikey_message_unref)
+#endif
+
+#ifdef G_DEFINE_AUTOPTR_CLEANUP_FUNC
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(GstMIKEYPayload, gst_mikey_payload_unref)
+#endif
+
 G_END_DECLS
 
 #endif /* __GST_MIKEY_H__ */
-

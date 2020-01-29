@@ -54,7 +54,9 @@ struct _GESAudioTrack
   gpointer         _ges_reserved[GES_PADDING];
 };
 
+GES_API
 GType          ges_audio_track_get_type (void) G_GNUC_CONST;
+GES_API
 GESAudioTrack* ges_audio_track_new (void);
 
 G_END_DECLS

@@ -1,6 +1,6 @@
 /* graphene-version.h: Versioning macros
  *
- * Copyright © 2014  Emmanuele Bassi
+ * Copyright 2014  Emmanuele Bassi
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -102,6 +102,17 @@
 # define GRAPHENE_VERSION_PREV_STABLE   (_GRAPHENE_ENCODE_VERSION (GRAPHENE_MAJOR_VERSION, GRAPHENE_MINOR_VERSION - 2))
 #endif
 
+/* version defines
+ *
+ * remember to add new macros at the beginning of each development cycle
+ */
+
+#define GRAPHENE_VERSION_1_0    (_GRAPHENE_ENCODE_VERSION (1, 0))
+#define GRAPHENE_VERSION_1_2    (_GRAPHENE_ENCODE_VERSION (1, 2))
+#define GRAPHENE_VERSION_1_4    (_GRAPHENE_ENCODE_VERSION (1, 4))
+#define GRAPHENE_VERSION_1_6    (_GRAPHENE_ENCODE_VERSION (1, 6))
+#define GRAPHENE_VERSION_1_8    (_GRAPHENE_ENCODE_VERSION (1, 8))
+
 #ifndef GRAPHENE_VERSION_MIN_REQUIRED
 # define GRAPHENE_VERSION_MIN_REQUIRED  (GRAPHENE_VERSION_1_0)
 #endif
@@ -122,21 +133,12 @@
 # error "GRAPHENE_VERSION_MIN_REQUIRED must be >= GRAPHENE_VERSION_1_0"
 #endif
 
-/* version defines
- *
- * remember to add new macros at the beginning of each development cycle
- */
-
-#define GRAPHENE_VERSION_1_0    (_GRAPHENE_ENCODE_VERSION (1, 0))
-
 /* unconditional */
 #define GRAPHENE_DEPRECATED_IN_1_0              GRAPHENE_DEPRECATED
 #define GRAPHENE_DEPRECATED_IN_1_0_FOR(f)       GRAPHENE_DEPRECATED_FOR(f)
 #define GRAPHENE_AVAILABLE_IN_1_0               _GRAPHENE_PUBLIC
 
 /* Graphene 1.2 */
-#define GRAPHENE_VERSION_1_2    (_GRAPHENE_ENCODE_VERSION (1, 2))
-
 #if GRAPHENE_VERSION_MIN_REQUIRED >= GRAPHENE_VERSION_1_2
 # define GRAPHENE_DEPRECATED_IN_1_2             GRAPHENE_DEPRECATED
 # define GRAPHENE_DEPRECATED_IN_1_2_FOR(f)      GRAPHENE_DEPRECATED_FOR(f)
@@ -145,10 +147,55 @@
 # define GRAPHENE_DEPRECATED_IN_1_2_FOR(f)      _GRAPHENE_PUBLIC
 #endif
 
-#if GRAPHENE_VERSION_MAX_ALLOWED < GRAPHENE_VERSION_1_20
+#if GRAPHENE_VERSION_MAX_ALLOWED < GRAPHENE_VERSION_1_2
 # define GRAPHENE_AVAILABLE_IN_1_2              GRAPHENE_UNAVAILABLE(1,2)
 #else
 # define GRAPHENE_AVAILABLE_IN_1_2              _GRAPHENE_PUBLIC
+#endif
+
+/* Graphene 1.4 */
+#if GRAPHENE_VERSION_MIN_REQUIRED >= GRAPHENE_VERSION_1_4
+# define GRAPHENE_DEPRECATED_IN_1_4             GRAPHENE_DEPRECATED
+# define GRAPHENE_DEPRECATED_IN_1_4_FOR(f)      GRAPHENE_DEPRECATED_FOR(f)
+#else
+# define GRAPHENE_DEPRECATED_IN_1_4             _GRAPHENE_PUBLIC
+# define GRAPHENE_DEPRECATED_IN_1_4_FOR(f)      _GRAPHENE_PUBLIC
+#endif
+
+#if GRAPHENE_VERSION_MAX_ALLOWED < GRAPHENE_VERSION_1_4
+# define GRAPHENE_AVAILABLE_IN_1_4              GRAPHENE_UNAVAILABLE(1,4)
+#else
+# define GRAPHENE_AVAILABLE_IN_1_4              _GRAPHENE_PUBLIC
+#endif
+
+/* Graphene 1.6 */
+#if GRAPHENE_VERSION_MIN_REQUIRED >= GRAPHENE_VERSION_1_6
+# define GRAPHENE_DEPRECATED_IN_1_6             GRAPHENE_DEPRECATED
+# define GRAPHENE_DEPRECATED_IN_1_6_FOR(f)      GRAPHENE_DEPRECATED_FOR(f)
+#else
+# define GRAPHENE_DEPRECATED_IN_1_6             _GRAPHENE_PUBLIC
+# define GRAPHENE_DEPRECATED_IN_1_6_FOR(f)      _GRAPHENE_PUBLIC
+#endif
+
+#if GRAPHENE_VERSION_MAX_ALLOWED < GRAPHENE_VERSION_1_6
+# define GRAPHENE_AVAILABLE_IN_1_6              GRAPHENE_UNAVAILABLE(1,6)
+#else
+# define GRAPHENE_AVAILABLE_IN_1_6              _GRAPHENE_PUBLIC
+#endif
+
+/* Graphene 1.8 */
+#if GRAPHENE_VERSION_MIN_REQUIRED >= GRAPHENE_VERSION_1_8
+# define GRAPHENE_DEPRECATED_IN_1_8             GRAPHENE_DEPRECATED
+# define GRAPHENE_DEPRECATED_IN_1_8_FOR(f)      GRAPHENE_DEPRECATED_FOR(f)
+#else
+# define GRAPHENE_DEPRECATED_IN_1_8             _GRAPHENE_PUBLIC
+# define GRAPHENE_DEPRECATED_IN_1_8_FOR(f)      _GRAPHENE_PUBLIC
+#endif
+
+#if GRAPHENE_VERSION_MAX_ALLOWED < GRAPHENE_VERSION_1_8
+# define GRAPHENE_AVAILABLE_IN_1_8              GRAPHENE_UNAVAILABLE(1,8)
+#else
+# define GRAPHENE_AVAILABLE_IN_1_8              _GRAPHENE_PUBLIC
 #endif
 
 #endif /* __GRAPHENE_VERSION_MACROS_H__ */

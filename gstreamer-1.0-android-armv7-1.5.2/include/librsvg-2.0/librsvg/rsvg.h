@@ -194,6 +194,8 @@ RsvgHandle *rsvg_handle_new_from_stream_sync (GInputStream   *input_stream,
 RsvgHandle *rsvg_handle_new_from_data (const guint8 * data, gsize data_len, GError ** error);
 RsvgHandle *rsvg_handle_new_from_file (const gchar * file_name, GError ** error);
 
+void rsvg_handle_internal_set_testing (RsvgHandle *handle, gboolean testing);
+
 /* BEGIN deprecated APIs. Do not use! */
 
 #ifndef __GI_SCANNER__
@@ -215,6 +217,7 @@ void rsvg_handle_free (RsvgHandle * handle);
  * Function to let a user of the library specify the SVG's dimensions
  *
  * Deprecated: Set up a cairo matrix and use rsvg_handle_render_cairo() instead.
+ * See the documentation for rsvg_handle_set_size_callback() for an example.
  */
 typedef /* RSVG_DEPRECATED */ void (*RsvgSizeFunc) (gint * width, gint * height, gpointer user_data);
 

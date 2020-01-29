@@ -1,6 +1,6 @@
 /* graphene
  *
- * Copyright © 2014  Emmanuele Bassi
+ * Copyright 2014  Emmanuele Bassi
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -42,6 +42,7 @@
 #include "graphene-matrix.h"
 
 #include "graphene-point.h"
+#include "graphene-size.h"
 #include "graphene-rect.h"
 
 #include "graphene-point3d.h"
@@ -53,6 +54,7 @@
 #include "graphene-sphere.h"
 #include "graphene-box.h"
 #include "graphene-triangle.h"
+#include "graphene-ray.h"
 
 #undef GRAPHENE_H_INSIDE
 
