@@ -20,11 +20,27 @@ import QGroundControl.Palette               1.0
 
 //-------------------------------------------------------------------------
 //-- RC RSSI Indicator
+
 Item {
     width:          rssiRow.width * 1.1
     anchors.top:    parent.top
     anchors.bottom: parent.bottom
     visible:        true
+
+    function getRSSIColor() {
+        if(_activeVehicle) {
+            if(pD2dInforData.getUlRateValue() > 7) {
+                return qgcPal.colorGreen
+            }
+            if(pD2dInforData.getUlRateValue() > 4) {
+                return qgcPal.colorOrange
+            }
+            if(pD2dInforData.getUlRateValue() > 0.1) {
+                return qgcPal.colorRed
+            }
+        }
+        return qgcPal.colorGrey
+    }
 
     //end
     Component {
@@ -82,7 +98,7 @@ Item {
             id:                     dataRate
             text:                   qsTr("0kbps")
             font.pointSize:         ScreenTools.mediumFontPointSize
-            color:                  qgcPal.colorBlue
+            color:                  qgcPal.colorGrey
             anchors.verticalCenter: parent.verticalCenter
         }
 
@@ -90,6 +106,7 @@ Item {
             target:  pD2dInforData
             onSignalUpRate: {
                dataRate.text = pD2dInforData.getUlRateValue() + "kbps";
+               dataRate.color = getRSSIColor()
             }
         }
     }

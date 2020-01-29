@@ -32,8 +32,4 @@ QGCLabel {
 
     QGCPalette { id: qgcPal }
 
-//    QGCMouseArea {
-//        fillItem: parent
-//        onClicked: _armed ? toolBar.disarmVehicle() : toolBar.armVehicle()
-//    }
 }

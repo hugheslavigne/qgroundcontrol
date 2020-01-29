@@ -10,6 +10,7 @@
 import QtQuick          2.3
 import QtQuick.Controls 1.2
 import QtQuick.Layouts  1.2
+import QtQuick.Controls.Styles 1.4
 
 import QGroundControl                       1.0
 import QGroundControl.Controls              1.0
@@ -18,47 +19,54 @@ import QGroundControl.ScreenTools           1.0
 import QGroundControl.Palette               1.0
 
 //-------------------------------------------------------------------------
-//-- Armed Indicator
-Column {
-    id:                 graspingCol
-    spacing:            ScreenTools.defaultFontPixelHeight * 0.5
-    width:              graspingLabel.width * 2
-    anchors.margins:    ScreenTools.defaultFontPixelHeight
-    anchors.centerIn:   parent
+//-- Grasping Indicator
+Item {
+    id: graspingItem
+    anchors.top:    parent.top
+    anchors.topMargin:      7
+    visible:        true
+    width:          1000
 
-    QGCLabel {
-        id:                 graspingLabel
-        anchors.top:        parent.top
-        anchors.bottom:     parent.bottom
-        verticalAlignment:  Text.AlignVCenter
-        text:               "Grasping"
-        font.pointSize:     ScreenTools.mediumFontPointSize
-        color:              qgcPal.buttonText
-        QGCPalette { id: qgcPal }
-    }
 
-    ProgressBar {
-        id:                 graspingProgress
-        anchors.top:        parent.top
-        anchors.bottom:     parent.bottom
-        width:              graspingLabel.width
-        verticalAlignment:  Text.AlignVCenter
-        background: Rectangle {
-                color: "#e6e6e6"
-                radius: 3
-            }
-        contentItem: Item {
-                Rectangle {
-                    width: progressBar.visualPosition * parent.width
-                    height: parent.height
-                    radius: 2
-                    color: "#17a81a"
+    Row {
+        QGCLabel {
+            anchors.top:        parent.top
+            anchors.bottom:     parent.bottom
+            verticalAlignment:  Text.AlignVCenter
+            text:               "Cut "
+            font.pointSize:     ScreenTools.mediumFontPointSize
+            color:              qgcPal.buttonText
+        }
+        ProgressBar {
+            value:              0.4
+            style: ProgressBarStyle {
+                    background: Rectangle {
+                        radius: 2
+                        color: "lightgray"
+                        border.color: "gray"
+                        border.width: 1
+                        implicitWidth: 300
+                        implicitHeight: 50
                     }
-            }
+                    progress: Rectangle {
+                        color: "forestgreen"
+                        border.color: "forestgreen"
+                    }
+                }
+        }
+        QGCLabel {
+            anchors.top:        parent.top
+            anchors.bottom:     parent.bottom
+            verticalAlignment:  Text.AlignVCenter
+            text:               " 40%"
+            font.pointSize:     ScreenTools.mediumFontPointSize
+            color:              qgcPal.buttonText
+        }
+
     }
 
-//    QGCMouseArea {
-//        fillItem: parent
-//        onClicked: _armed ? toolBar.disarmVehicle() : toolBar.armVehicle()
-//    }
+
 }
+
+
+
