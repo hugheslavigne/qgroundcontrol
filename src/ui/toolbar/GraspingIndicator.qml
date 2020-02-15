@@ -27,6 +27,8 @@ Item {
     visible:        true
     width:          1000
 
+    property var _activeVehicle: QGroundControl.multiVehicleManager.activeVehicle
+
 
     Row {
         QGCLabel {
@@ -38,7 +40,7 @@ Item {
             color:              qgcPal.buttonText
         }
         ProgressBar {
-            value:              0.4
+            value: _activeVehicle.roll.value/100
             style: ProgressBarStyle {
                     background: Rectangle {
                         radius: 2
@@ -54,11 +56,12 @@ Item {
                     }
                 }
         }
+
         QGCLabel {
             anchors.top:        parent.top
             anchors.bottom:     parent.bottom
             verticalAlignment:  Text.AlignVCenter
-            text:               " 40%"
+            text:               " " + Math.floor(_activeVehicle.roll.value) + "%"
             font.pointSize:     ScreenTools.mediumFontPointSize
             color:              qgcPal.buttonText
         }
